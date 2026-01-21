@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Interfaces\AuthRepositoryInterface;
+use App\Repositories\AuthRepository;
 use Illuminate\Support\ServiceProvider;
 use App\services\LoggingService;
+use App\Services\WilayahService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,6 +17,9 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(LoggingService::class, function () {
             return new LoggingService();
+        });
+        $this->app->singleton(WilayahService::class, function () {
+            return new WilayahService();
         });
     }
 
