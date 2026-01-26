@@ -25,7 +25,7 @@ class AuthService
     {
         $existingUser = $this->authRepository->getUserByEmail($data['email']);
         if ($existingUser) {
-            throw new Exception('Email already registered');
+            throw new Exception('Email sudah terdaftar');
         }
 
         $user = $this->authRepository->register($data);
@@ -33,21 +33,21 @@ class AuthService
         // Generate OTP for email verification
         $otp = $this->authRepository->generateOtp($user->email, OtpType::Register->value);
 
-        Mail::to($user['email'])->queue(new OtpMail($otp, 'Verifikasi Email'));
+        Mail::to($user['email'])->send(new OtpMail($otp, 'Verifikasi Email'));
 
         return $user;
     }
 
-    public function login(array $data)
+    public function sendLoginOtp(array $data)
     {
         $user = $this->authRepository->getUserByEmail($data['email']);
 
         if (!$user) {
-            throw new Exception('Email not found');
+            throw new Exception('Akun tidak ditemukan');
         }
 
         if (!Hash::check($data['password'], $user->password)) {
-            throw new Exception('Invalid password');
+            throw new Exception('Password tidak valid');
         }
 
         if (!$user->email_verified_at) {
@@ -55,9 +55,23 @@ class AuthService
             $otp = $this->authRepository->generateOtp($user->email, OtpType::Register->value);
             Mail::to($user->email)->send(new OtpMail($otp, 'Verifikasi Email'));
 
-            throw new Exception('Email not verified. OTP has been resent to your email.');
+            throw new Exception('Email belum terverifikasi, kode OTP telah dikirim untuk memverifikasi Email anda');
         }
 
+        $otp = $this->authRepository->generateOtp($user->email, OtpType::Login->value);
+
+        return true;
+    }
+
+    public function login(string $email)
+    {
+        $user = $this->authRepository->getUserByEmail($email);
+
+        Auth::login($user);
+
+        if (!Auth::check()) {
+            throw new Exception('Proses login gagal');
+        }
         return $user;
     }
 
@@ -66,7 +80,7 @@ class AuthService
         $user = $this->authRepository->getUserByEmail($email);
 
         if (!$user) {
-            throw new Exception('Email not found');
+            throw new Exception('Akun tidak ditemukan');
         }
 
         $otp = $this->authRepository->generateOtp($email, OtpType::ResetPassword->value);
@@ -79,12 +93,16 @@ class AuthService
     public function verifyOtp(string $email, string $otp, $otpType)
     {
         $result = $this->authRepository->otpVerify($email, $otp, $otpType);
+
+        if ($otpType = OtpType::Register->value) {
+            $this->authRepository->updateVerifiedEmail($email);
+        }
         
         if (!$result['success']) {
-            throw new Exception($result['message'] ?? 'Invalid OTP');
+            throw new Exception($result['message'] ?? 'OTP tidak valid');
         }
 
-        return true;
+        return $result;
     }
 
     public function resetPassword(string $email, string $otp, string $password)
@@ -96,10 +114,10 @@ class AuthService
         $user = $this->authRepository->updatePasswordByEmail($email, $password);
         
         if (!$user) {
-            throw new Exception('Failed to reset password');
+            throw new Exception('Gagal mereset password');
         }
 
-        return $user;
+        return true;
     }
 
     public function resendOtp(string $email, string $otpType)
@@ -107,7 +125,7 @@ class AuthService
         $user = $this->authRepository->getUserByEmail($email);
         
         if (!$user && $otpType !== OtpType::Register->value) {
-            throw new Exception('Email not found');
+            throw new Exception('Akun tidak ditemukan');
         }
 
         // Regenerate OTP
@@ -133,12 +151,8 @@ class AuthService
         return true;
     }
 
-    public function logout($user)
+    public function logout()
     {
-        // Revoke all tokens (for API)
-        $user->tokens()->delete();
-        
-        // For web authentication
         Auth::logout();
         session()->invalidate();
         session()->regenerateToken();

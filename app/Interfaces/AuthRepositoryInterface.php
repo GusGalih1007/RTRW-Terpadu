@@ -11,4 +11,5 @@ interface AuthRepositoryInterface
     public function generateOtp(string $email, string $otpType);
     public function otpVerify(string $email, string $otp, string $otpType);
     public function resetOtp(string $email, string $otpType);
+    public function updateVerifiedEmail(string $email);
 }

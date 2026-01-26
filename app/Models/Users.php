@@ -37,7 +37,8 @@ class Users extends Authenticatable implements MustVerifyEmail
         'pekerjaan',
         'anggotaKeluarga',
         'latitude',
-        'longitude'
+        'longitude',
+        'email_verified_at'
     ];
 
     protected $hidden = [

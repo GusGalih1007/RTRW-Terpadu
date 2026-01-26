@@ -32,7 +32,7 @@ class AuthRepository implements AuthRepositoryInterface
             $data['password'] = Hash::make($data['password']);
             return $this->user->create($data);
         } catch (Exception $e) {
-            throw new Exception('Registration failed: ' . $e->getMessage());
+            throw new Exception('Registrasi gagal: ' . $e->getMessage());
         }
         // throw new Exception('Not implemented');
     }
@@ -53,7 +53,7 @@ class AuthRepository implements AuthRepositoryInterface
             return $user;
         }
 
-        throw new Exception('User not found');
+        throw new Exception('Akun tidak ditemukan');
         // throw new Exception('Not implemented');
     }
 
@@ -68,13 +68,13 @@ class AuthRepository implements AuthRepositoryInterface
             return $user;
         }
         
-        throw new Exception('User not found');
+        throw new Exception('Akun tidak ditemukan');
     }
 
     public function generateOtp(string $email, string $otpType)
     {
         if (!$otpType) {
-            throw new Exception('OTP type is required');
+            throw new Exception('Tipe OTP kosong');
         }
 
         $user = $this->getUserByEmail($email);
@@ -86,13 +86,13 @@ class AuthRepository implements AuthRepositoryInterface
     public function otpVerify(string $email, string $otp, string $otpType)
     {   
         if (!$otpType) {
-            throw new Exception('OTP type is required');
+            throw new Exception('Tipe OTP kosong');
         }
 
         $user = $this->getUserByEmail($email);
 
         if (!$user) {
-            return ['success' => false, 'message' => 'User not found'];
+            throw new Exception('Akun tidak ditemukan');
         }
 
         return $this->otpService->verify($user, OtpType::from($otpType), $otp);
@@ -102,12 +102,21 @@ class AuthRepository implements AuthRepositoryInterface
     public function resetOtp(string $email, string $otpType)
     {
         if (!$otpType) {
-            throw new Exception('OTP type is required');
+            throw new Exception('Tipe OTP kosong');
         }
 
         $user = $this->getUserByEmail($email);
 
         return $this->otpService->generate($user, OtpType::from($otpType));
         // throw new Exception('Not implemented');
+    }
+
+    public function updateVerifiedEmail(string $email)
+    {
+        $user = $this->getUserByEmail($email);
+        if ($user) {
+            $user->update(['email_verified_at' => now()]);
+        }
+        return $user;
     }
 }

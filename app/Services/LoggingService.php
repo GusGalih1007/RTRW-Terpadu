@@ -18,7 +18,7 @@ class LoggingService
         Log::warning('[' . $controller . ']->' . $message, $this->formatContext($context));
     }
 
-    public function error($controller, string $message, Throwable $e, array $context)
+    public function error($controller, string $message, ?Throwable $e = null, array $context = [])
     {
         if ($e)
         {
@@ -33,7 +33,7 @@ class LoggingService
         Log::error('[' . $controller . ']->' . $message, $this->formatContext($context));
     }
 
-    protected function formatContext(array $context): array
+    protected function formatContext(array $context = []): array
     {
         return array_merge([
             'app_env' => config('app.env'),
