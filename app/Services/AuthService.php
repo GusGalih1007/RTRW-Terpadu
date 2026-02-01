@@ -2,17 +2,18 @@
 
 namespace App\Services;
 
-use App\Interfaces\AuthRepositoryInterface;
 use App\Enums\OtpType;
+use App\Interfaces\AuthRepositoryInterface;
 use App\Mail\OtpMail;
 use Exception;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class AuthService
 {
     protected $authRepository;
+
     /**
      * Create a new class instance.
      */
@@ -42,44 +43,35 @@ class AuthService
     {
         $user = $this->authRepository->getUserByEmail($data['email']);
 
-        if (!$user) {
+        if (! $user) {
             throw new Exception('Akun tidak ditemukan');
         }
 
-        if (!Hash::check($data['password'], $user->password)) {
+        if (! Hash::check($data['password'], $user->password)) {
             throw new Exception('Password tidak valid');
         }
 
-        if (!$user->email_verified_at) {
-            // Regenerate OTP for verification
-            $otp = $this->authRepository->generateOtp($user->email, OtpType::Register->value);
-            Mail::to($user->email)->send(new OtpMail($otp, 'Verifikasi Email'));
-
-            throw new Exception('Email belum terverifikasi, kode OTP telah dikirim untuk memverifikasi Email anda');
+        if (! $user->email_verified_at) {
+            throw new Exception('Email belum terverifikasi');
         }
 
         $otp = $this->authRepository->generateOtp($user->email, OtpType::Login->value);
 
+        Mail::to($user['email'])->send(new OtpMail($otp, 'Verifikasi Login'));
+
         return true;
     }
 
-    public function login(string $email)
+    public function getUser(string $email)
     {
-        $user = $this->authRepository->getUserByEmail($email);
-
-        Auth::login($user);
-
-        if (!Auth::check()) {
-            throw new Exception('Proses login gagal');
-        }
-        return $user;
+        return $this->authRepository->getUserByEmail($email);
     }
 
     public function requestPasswordReset(string $email)
     {
         $user = $this->authRepository->getUserByEmail($email);
 
-        if (!$user) {
+        if (! $user) {
             throw new Exception('Akun tidak ditemukan');
         }
 
@@ -94,11 +86,11 @@ class AuthService
     {
         $result = $this->authRepository->otpVerify($email, $otp, $otpType);
 
-        if ($otpType = OtpType::Register->value) {
+        if ($otpType === OtpType::Register->value) {
             $this->authRepository->updateVerifiedEmail($email);
         }
-        
-        if (!$result['success']) {
+
+        if (! $result['success']) {
             throw new Exception($result['message'] ?? 'OTP tidak valid');
         }
 
@@ -112,8 +104,8 @@ class AuthService
 
         // Update password
         $user = $this->authRepository->updatePasswordByEmail($email, $password);
-        
-        if (!$user) {
+
+        if (! $user) {
             throw new Exception('Gagal mereset password');
         }
 
@@ -123,8 +115,8 @@ class AuthService
     public function resendOtp(string $email, string $otpType)
     {
         $user = $this->authRepository->getUserByEmail($email);
-        
-        if (!$user && $otpType !== OtpType::Register->value) {
+
+        if (! $user && $otpType !== OtpType::Register->value) {
             throw new Exception('Akun tidak ditemukan');
         }
 
@@ -145,7 +137,7 @@ class AuthService
             default:
                 $subject = 'Verifikasi Tindakan Khusus';
         }
-        
+
         Mail::to($email)->send(new OtpMail($otp, $subject));
 
         return true;

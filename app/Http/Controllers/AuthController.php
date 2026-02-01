@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OtpType;
 use App\Services\AuthService;
 use App\Services\LoggingService;
 use App\Services\WilayahService;
-use Illuminate\Support\Facades\Validator;
 use Exception;
 use Illuminate\Http\Request;
-use App\Enums\OtpType;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
     protected $authService;
+
     protected $loggingService;
+
     protected $wilayahService;
 
     public function __construct(AuthService $authService, LoggingService $loggingService, WilayahService $wilayahService)
@@ -22,6 +25,7 @@ class AuthController extends Controller
         $this->loggingService = $loggingService;
         $this->wilayahService = $wilayahService;
     }
+
     public function registerPage()
     {
         return view('auth.register');
@@ -42,13 +46,14 @@ class AuthController extends Controller
                 'kodeKelurahan' => ['nullable', 'numeric', 'max_digits:10'],
                 'alamatDetail' => ['required', 'string'],
                 'pekerjaan' => ['required', 'string', 'max:100'],
-                'anggotaKeluarga' => ['required', 'numeric']
+                'anggotaKeluarga' => ['required', 'numeric'],
             ]);
 
             if ($validate->fails()) {
                 $this->loggingService->error('AuthController', 'Kesalahan Validasi', null, [
-                    'request' => $validate->errors()
+                    'request' => $validate->errors(),
                 ]);
+
                 return redirect()->back()->withErrors($validate->errors())->withInput($request->all())->with('error', 'Mohon lengkapi data anda');
             }
 
@@ -56,13 +61,13 @@ class AuthController extends Controller
 
             session([
                 'email' => $user->email,
-                'type' => OtpType::Register->value
+                'type' => OtpType::Register->value,
             ]);
 
             return redirect()->route('auth.verify-otp');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, [
-                'request' => $request
+                'request' => $request,
             ]);
 
             return redirect()->back()->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti');
@@ -71,6 +76,7 @@ class AuthController extends Controller
 
     public function loginPage()
     {
+        // dd(Auth::user());
         return view('auth.login');
     }
 
@@ -79,26 +85,26 @@ class AuthController extends Controller
         try {
             $validate = Validator::make($request->all(), [
                 'email' => ['required', 'email', 'exists:users,email'],
-                'password' => ['required', 'min:8']
+                'password' => ['required', 'min:8'],
             ]);
 
             if ($validate->fails()) {
                 $this->loggingService->error('AuthController', 'Gagal Validasi', null, [
-                    'request' => $request->all()
+                    'request' => $request->all(),
                 ]);
             }
 
-            $this->authService->sendLoginOtp($request->email);
+            $this->authService->sendLoginOtp($request->all());
 
             session([
                 'email' => $request->email,
-                'type' => OtpType::Login->value
+                'type' => OtpType::Login->value,
             ]);
 
-            return redirect()->route('');
+            return redirect()->route('auth.verify-otp');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, [
-                'request' => $request
+                'request' => $request,
             ]);
 
             return redirect()->back()->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti');
@@ -110,20 +116,11 @@ class AuthController extends Controller
         return view('');
     }
 
-    public function forgotPassword(Request $request)
-    {
+    public function forgotPassword(Request $request) {}
 
-    }
+    public function resetPasswordPage() {}
 
-    public function resetPasswordPage()
-    {
-
-    }
-
-    public function resetPassword(Request $request)
-    {
-
-    }
+    public function resetPassword(Request $request) {}
 
     public function verifyOtpPage()
     {
@@ -135,34 +132,32 @@ class AuthController extends Controller
         try {
             $validate = Validator::make($request->all(), [
                 'otp',
-                ['required', 'numeric']
+                ['required', 'numeric'],
             ]);
 
-            if (!$validate) {
+            if (! $validate) {
                 throw new Exception('Session tidak valid. Silakan ulangi proses.');
             }
 
             $type = session('type');
             $email = session('email');
 
-            if (!$type || !$email) {
+            if (! $type || ! $email) {
                 $this->loggingService->error('AuthController', 'Session tidak valid. Silakan ulangi proses');
             }
 
             $this->authService->verifyOtp($email, $request->otp, $type);
 
-            session()->forget(['email', 'type']);
-
-            if ($type === 'register') {
+            if ($type == OtpType::Register->value) {
+                session()->forget(['email', 'type']);
                 return redirect()->route('auth.login')->with('success', 'Berhasil register. Silakan untuk login');
+            } elseif ($type == OtpType::Login->value) {
+                $user = $this->authService->getUser($email);
+                Auth::login($user);
+                request()->session()->regenerate(); // IMPORTANT: Assigns the user to a fresh session ID
+                session()->forget(['email', 'type']);
+                return redirect()->route('welcome')->with('success', 'Login berhasil. Selamat datang');
             }
-
-            if ($type === 'login') {
-                $user = $this->authService->login($email);
-                return redirect()->route('/')->with('success', 'Login berhasil. Selamat datang, ' . $user->username);
-            }
-            
-            throw new Exception('Tipe OTP tidak dikenali.');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, []);
 
@@ -172,12 +167,11 @@ class AuthController extends Controller
 
     public function resetOtp()
     {
-        try
-        {
+        try {
             $type = session('type');
             $email = session('email');
 
-            if (!$type || !$email) {
+            if (! $type || ! $email) {
                 $this->loggingService->error('AuthController', 'Session tidak valid. Silakan ulangi proses');
             }
 
@@ -186,12 +180,21 @@ class AuthController extends Controller
             return redirect()->back()->with('success', 'OTP telah dikirim. Cek Email anda');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, []);
+
             return redirect()->back()->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti');
         }
     }
 
     public function logout()
     {
+        try {
+            $this->authService->logout();
 
+            return redirect()->route('auth.login')->with('success', 'Berhasil logout');
+        } catch (Exception $e) {
+            $this->loggingService->error('AuthController', 'Logout failed', $e, []);
+
+            return back()->with('error', 'Proses logout gagal. Coba lagi nanti');
+        }
     }
 }

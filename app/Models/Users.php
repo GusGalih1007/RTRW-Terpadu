@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class Users extends Authenticatable implements MustVerifyEmail
+class Users extends Authenticatable
 {
     use Notifiable, HasFactory, HasUuids;
     use Prunable;
@@ -47,6 +47,7 @@ class Users extends Authenticatable implements MustVerifyEmail
     ];
 
     protected $casts = [
+        'userId' => 'string',
         'roleId' => 'string',
         'phone' => 'json',
         'created_at' => 'datetime',

@@ -39,7 +39,7 @@ class AuthRepository implements AuthRepositoryInterface
 
     public function getUserByEmail(string $email)
     {
-        return $this->user->where('email', $email)->first();
+        return $this->user->where('email','=', $email)->first();
         // throw new Exception('Not implemented');
     }
 
