@@ -37,6 +37,19 @@ class AuthRepository implements AuthRepositoryInterface
         // throw new Exception('Not implemented');
     }
 
+    public function saveQrImage(string $email, string $qrPath)
+    {
+        try 
+        {
+            $user = $this->getUserByEmail($email);
+            $user->update([
+                'qrImage' => $qrPath
+            ]);
+        } catch (Exception $e) {
+            throw new Exception('Gagal membuat code QR: ' . $e->getMessage());
+        }
+    }
+
     public function getUserByEmail(string $email)
     {
         return $this->user->where('email','=', $email)->first();
@@ -73,50 +86,69 @@ class AuthRepository implements AuthRepositoryInterface
 
     public function generateOtp(string $email, string $otpType)
     {
-        if (!$otpType) {
-            throw new Exception('Tipe OTP kosong');
+        try
+        {
+            if (!$otpType) {
+                throw new Exception('Tipe OTP kosong');
+            }
+    
+            $user = $this->getUserByEmail($email);
+    
+            return $this->otpService->generate($user, OtpType::from($otpType));
+        } catch (Exception $e) {
+            throw new Exception('Gagal membuat OTP: ' . $e->getMessage());
         }
-
-        $user = $this->getUserByEmail($email);
-
-        return $this->otpService->generate($user, OtpType::from($otpType));
         // throw new Exception('Not implemented');
     }
 
     public function otpVerify(string $email, string $otp, string $otpType)
     {   
-        if (!$otpType) {
-            throw new Exception('Tipe OTP kosong');
+        try
+        {
+            if (!$otpType) {
+                throw new Exception('Tipe OTP kosong');
+            }
+    
+            $user = $this->getUserByEmail($email);
+    
+            if (!$user) {
+                throw new Exception('Akun tidak ditemukan');
+            }
+    
+            return $this->otpService->verify($user, OtpType::from($otpType), $otp);
+        } catch (Exception $e) {
+            throw new Exception('Gagal memverifikasi OTP: ' . $e->getMessage());
         }
-
-        $user = $this->getUserByEmail($email);
-
-        if (!$user) {
-            throw new Exception('Akun tidak ditemukan');
-        }
-
-        return $this->otpService->verify($user, OtpType::from($otpType), $otp);
         // throw new Exception('Not implemented');
     }
 
     public function resetOtp(string $email, string $otpType)
     {
-        if (!$otpType) {
-            throw new Exception('Tipe OTP kosong');
+        try
+        {
+            if (!$otpType) {
+                throw new Exception('Tipe OTP kosong');
+            }
+    
+            $user = $this->getUserByEmail($email);
+    
+            return $this->otpService->generate($user, OtpType::from($otpType));
+        } catch (Exception $e) {
+            throw new Exception('Gagal mereset OTP: ' . $e->getMessage());
         }
-
-        $user = $this->getUserByEmail($email);
-
-        return $this->otpService->generate($user, OtpType::from($otpType));
-        // throw new Exception('Not implemented');
     }
 
     public function updateVerifiedEmail(string $email)
     {
-        $user = $this->getUserByEmail($email);
-        if ($user) {
-            $user->update(['email_verified_at' => now()]);
+        try
+        {
+            $user = $this->getUserByEmail($email);
+            if ($user) {
+                $user->update(['email_verified_at' => now()]);
+            }
+            return $user;
+        } catch (Exception $e) {
+            throw new Exception('Gagal memverifikasi Email: ' . $e->getMessage());
         }
-        return $user;
     }
 }
