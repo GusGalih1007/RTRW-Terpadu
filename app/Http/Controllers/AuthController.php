@@ -131,30 +131,44 @@ class AuthController extends Controller
     {
         try {
             $validate = Validator::make($request->all(), [
-                'otp',
-                ['required', 'numeric'],
+                'otp' => ['required', 'numeric'],
             ]);
 
-            if (! $validate) {
-                throw new Exception('Session tidak valid. Silakan ulangi proses.');
+            if ($validate->fails()) {
+                throw new Exception('Data OTP tidak valid');
             }
 
             $type = session('type');
             $email = session('email');
 
             if (! $type || ! $email) {
-                $this->loggingService->error('AuthController', 'Session tidak valid. Silakan ulangi proses');
+                throw new Exception('Session tidak valid. Silakan ulangi proses.');
             }
 
             $this->authService->verifyOtp($email, $request->otp, $type);
 
             if ($type == OtpType::Register->value) {
+                // Generate QR code for new user
+                $qrResult = $this->authService->generateQrImage($email, 'qrcodes');
+                
+                if ($qrResult['success']) {
+                    $this->loggingService->info('AuthController', 'QR code berhasil dibuat untuk user baru', [
+                        'email' => $email,
+                        'qr_path' => $qrResult['qr_path']
+                    ]);
+                } else {
+                    $this->loggingService->warning('AuthController', 'Gagal membuat QR code untuk user baru', [
+                        'email' => $email,
+                        'error' => $qrResult['message']
+                    ]);
+                }
+
                 session()->forget(['email', 'type']);
                 return redirect()->route('auth.login')->with('success', 'Berhasil register. Silakan untuk login');
             } elseif ($type == OtpType::Login->value) {
                 $user = $this->authService->getUser($email);
                 Auth::login($user);
-                request()->session()->regenerate(); // IMPORTANT: Assigns the user to a fresh session ID
+                request()->session()->regenerate();
                 session()->forget(['email', 'type']);
                 return redirect()->route('welcome')->with('success', 'Login berhasil. Selamat datang');
             }

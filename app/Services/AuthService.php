@@ -45,23 +45,42 @@ class AuthService
         try {
             $user = $this->authRepository->getUserByEmail($email);
 
+            if (!$user) {
+                throw new Exception('Pengguna tidak ditemukan');
+            }
+
             $qrContent = (string) $user->userId;
 
-            $fileName = "qrcodes/user_qr_{$user->id}.png";
-            $storagePath = storage_path("app/public/{$fileName}");
+            // Pastikan direktori penyimpanan ada
+            $directory = storage_path("app/public/{$path}");
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
 
+            $fileName = "user_qr_{$user->userId}.png";
+            $storagePath = storage_path("app/public/{$path}/{$fileName}");
+
+            // Generate QR code menggunakan Simple-QRCode
             QrCode::format('png')
                 ->size(300)
                 ->margin(2)
                 ->generate($qrContent, $storagePath);
 
+            // Simpan path QR code ke database
             $user->update([
-                'qrImage' => $fileName
+                'qrImage' => "{$path}/{$fileName}"
             ]);
 
-            return true;
+            return [
+                'success' => true,
+                'message' => 'QR code berhasil dibuat',
+                'qr_path' => "{$path}/{$fileName}"
+            ];
         } catch (Exception $e) {
-            throw new Exception('Gagal membuat kode QR: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Gagal membuat kode QR: ' . $e->getMessage()
+            ];
         }
     }
 
