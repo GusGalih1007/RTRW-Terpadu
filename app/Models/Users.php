@@ -62,7 +62,7 @@ class Users extends Authenticatable
         $this->belongsTo(Role::class, 'roleId', 'roleId');
     }
 
-    public function prunable()
+    public static function prunable()
     {
         return static::whereNull('email_verified_at')->where('created_at', '<', now()->subDay());
     }

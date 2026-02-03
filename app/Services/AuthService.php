@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Enums\OtpType;
 use App\Interfaces\AuthRepositoryInterface;
 use App\Mail\OtpMail;
@@ -10,6 +9,8 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Storage;
 
 class AuthService
 {
@@ -40,47 +41,38 @@ class AuthService
         return $user;
     }
 
-    public function generateQrImage(string $email, string $path)
+    public function generateQrImage(string $userId)
     {
         try {
-            $user = $this->authRepository->getUserByEmail($email);
+            $qrContent = (string) $userId;
 
-            if (!$user) {
-                throw new Exception('Pengguna tidak ditemukan');
-            }
+            $directory = 'user_qr';
+            $fileName = "user_qr_{$userId}.png";
+            $relativePath = "{$directory}/{$fileName}";
 
-            $qrContent = (string) $user->userId;
+            // Pastikan direktori ada (Laravel way)
+            Storage::disk('public')->makeDirectory($directory);
 
-            // Pastikan direktori penyimpanan ada
-            $directory = storage_path("app/public/{$path}");
-            if (!file_exists($directory)) {
-                mkdir($directory, 0755, true);
-            }
-
-            $fileName = "user_qr_{$user->userId}.png";
-            $storagePath = storage_path("app/public/{$path}/{$fileName}");
-
-            // Generate QR code menggunakan Simple-QRCode
+            // Generate QR code
             QrCode::format('png')
                 ->size(300)
                 ->margin(2)
-                ->generate($qrContent, $storagePath);
+                ->generate(
+                    $qrContent,
+                    storage_path("app/public/{$relativePath}")
+                );
 
-            // Simpan path QR code ke database
-            $user->update([
-                'qrImage' => "{$path}/{$fileName}"
-            ]);
+            // Simpan path RELATIVE ke database
+            $this->authRepository->saveQrImage($userId, $relativePath);
 
             return [
                 'success' => true,
                 'message' => 'QR code berhasil dibuat',
-                'qr_path' => "{$path}/{$fileName}"
+                'qr_path' => $relativePath,
+                'qr_url' => Storage::url($relativePath),
             ];
         } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Gagal membuat kode QR: ' . $e->getMessage()
-            ];
+            throw new Exception('Gagal membuat kode QR: ' . $e->getMessage());
         }
     }
 
@@ -88,15 +80,15 @@ class AuthService
     {
         $user = $this->authRepository->getUserByEmail($data['email']);
 
-        if (!$user) {
+        if (! $user) {
             throw new Exception('Akun tidak ditemukan');
         }
 
-        if (!Hash::check($data['password'], $user->password)) {
+        if (! Hash::check($data['password'], $user->password)) {
             throw new Exception('Password tidak valid');
         }
 
-        if (!$user->email_verified_at) {
+        if (! $user->email_verified_at) {
             throw new Exception('Email belum terverifikasi');
         }
 
@@ -107,16 +99,21 @@ class AuthService
         return true;
     }
 
-    public function getUser(string $email)
+    public function getUserByEmail(string $email)
     {
         return $this->authRepository->getUserByEmail($email);
+    }
+
+    public function getUserById(string $userId)
+    {
+        return $this->authRepository->getUserById($userId);
     }
 
     public function requestPasswordReset(string $email)
     {
         $user = $this->authRepository->getUserByEmail($email);
 
-        if (!$user) {
+        if (! $user) {
             throw new Exception('Akun tidak ditemukan');
         }
 
@@ -135,7 +132,7 @@ class AuthService
             $this->authRepository->updateVerifiedEmail($email);
         }
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             throw new Exception($result['message'] ?? 'OTP tidak valid');
         }
 
@@ -150,7 +147,7 @@ class AuthService
         // Update password
         $user = $this->authRepository->updatePasswordByEmail($email, $password);
 
-        if (!$user) {
+        if (! $user) {
             throw new Exception('Gagal mereset password');
         }
 
@@ -161,7 +158,7 @@ class AuthService
     {
         $user = $this->authRepository->getUserByEmail($email);
 
-        if (!$user && $otpType !== OtpType::Register->value) {
+        if (! $user && $otpType !== OtpType::Register->value) {
             throw new Exception('Akun tidak ditemukan');
         }
 

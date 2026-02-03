@@ -37,14 +37,21 @@ class AuthRepository implements AuthRepositoryInterface
         // throw new Exception('Not implemented');
     }
 
-    public function saveQrImage(string $email, string $qrPath)
+    public function saveQrImage(string $userId, string $qrPath)
     {
         try 
         {
-            $user = $this->getUserByEmail($email);
+            $user = $this->getUserById($userId);
+            
+            if (!$user) {
+                throw new Exception('Akun tidak ditemukan');
+            }
+
             $user->update([
                 'qrImage' => $qrPath
             ]);
+
+            return true;
         } catch (Exception $e) {
             throw new Exception('Gagal membuat code QR: ' . $e->getMessage());
         }
@@ -54,6 +61,11 @@ class AuthRepository implements AuthRepositoryInterface
     {
         return $this->user->where('email','=', $email)->first();
         // throw new Exception('Not implemented');
+    }
+
+    public function getUserById(string $userId)
+    {
+        return $this->user->findOrFail($userId);
     }
 
     public function updatePasswordByEmail(string $email, string $newPassword)

@@ -35,10 +35,10 @@ class AuthController extends Controller
     {
         try {
             $validate = Validator::make($request->all(), [
-                'nik' => ['required', 'numeric', 'max_digits:16', 'min_digits:16', 'unique:users,nik'],
+                'nik' => ['required', 'numeric', 'max_digits:16', 'min_digits:16'],
                 'username' => ['required', 'string', 'max:80'],
                 'phone' => ['required', 'numeric', 'min_digits:11', 'max_digits:20'],
-                'email' => ['required', 'email', 'unique:users,email'],
+                'email' => ['required', 'email'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
                 'kodeProvinsi' => ['nullable', 'numeric', 'max_digits:2'],
                 'kodeKabupaten' => ['nullable', 'numeric', 'max_digits:4'],
@@ -57,10 +57,23 @@ class AuthController extends Controller
                 return redirect()->back()->withErrors($validate->errors())->withInput($request->all())->with('error', 'Mohon lengkapi data anda');
             }
 
+            $existingEmail = $this->authService->getUserByEmail($request->email);
+
+            if ($existingEmail && $existingEmail->email_verified_at != null) {
+                $this->authService->resendOtp($existingEmail->email, OtpType::Register->value);
+
+                session([
+                    'userId' => $existingEmail->userId,
+                    'type' => OtpType::Register->value,
+                ]);
+
+                return redirect()->route('auth.verify-otp')->with('success', 'Silakan verifikasi akun yang telah kamu buat');
+            }
+
             $user = $this->authService->register($request->all());
 
             session([
-                'email' => $user->email,
+                'userId' => $user->userId,
                 'type' => OtpType::Register->value,
             ]);
 
@@ -72,6 +85,13 @@ class AuthController extends Controller
 
             return redirect()->back()->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti');
         }
+    }
+
+    public function showQrImage(string $userId)
+    {
+        $user = $this->authService->getUserById($userId);
+
+        return view('auth.showQr', compact($user));
     }
 
     public function loginPage()
@@ -111,10 +131,7 @@ class AuthController extends Controller
         }
     }
 
-    public function forgotPasswordPage()
-    {
-        return view('');
-    }
+    public function forgotPasswordPage() {}
 
     public function forgotPassword(Request $request) {}
 
@@ -139,39 +156,45 @@ class AuthController extends Controller
             }
 
             $type = session('type');
+            $userId = session('userId');
             $email = session('email');
 
-            if (! $type || ! $email) {
-                throw new Exception('Session tidak valid. Silakan ulangi proses.');
-            }
+            if ($type && $userId || $email) {
+                if ($type == OtpType::Register->value) {
+                    $user = $this->authService->getUserById($userId);
 
-            $this->authService->verifyOtp($email, $request->otp, $type);
+                    $this->authService->verifyOtp($user->email, $request->otp, $type);
 
-            if ($type == OtpType::Register->value) {
-                // Generate QR code for new user
-                $qrResult = $this->authService->generateQrImage($email, 'qrcodes');
-                
-                if ($qrResult['success']) {
-                    $this->loggingService->info('AuthController', 'QR code berhasil dibuat untuk user baru', [
-                        'email' => $email,
-                        'qr_path' => $qrResult['qr_path']
-                    ]);
-                } else {
-                    $this->loggingService->warning('AuthController', 'Gagal membuat QR code untuk user baru', [
-                        'email' => $email,
-                        'error' => $qrResult['message']
-                    ]);
+                    // Generate QR code for new user
+                    $qrResult = $this->authService->generateQrImage($userId);
+
+                    if ($qrResult['success']) {
+                        $this->loggingService->info('AuthController', 'QR code berhasil dibuat untuk user baru', [
+                            'email' => $user->email,
+                            'qr_path' => $qrResult['qr_path'],
+                        ]);
+                    } else {
+                        $this->loggingService->warning('AuthController', 'Gagal membuat QR code untuk user baru', [
+                            'email' => $user->email,
+                            'error' => $qrResult['message'],
+                        ]);
+                    }
+
+                    return redirect()->route('auth.show-user-qr', $userId)->with('success', 'Berhasil register. Silakan untuk login');
+                } elseif ($type == OtpType::Login->value) {
+                    $this->authService->verifyOtp($email, $request->otp, $type);
+
+                    $user = $this->authService->getUserByEmail($email);
+
+                    Auth::login($user);
+
+                    request()->session()->regenerate();
+                    session()->forget(['email', 'type']);
+
+                    return redirect()->route('welcome')->with('success', 'Login berhasil. Selamat datang');
                 }
-
-                session()->forget(['email', 'type']);
-                return redirect()->route('auth.login')->with('success', 'Berhasil register. Silakan untuk login');
-            } elseif ($type == OtpType::Login->value) {
-                $user = $this->authService->getUser($email);
-                Auth::login($user);
-                request()->session()->regenerate();
-                session()->forget(['email', 'type']);
-                return redirect()->route('welcome')->with('success', 'Login berhasil. Selamat datang');
             }
+            throw new Exception('Session tidak valid. Silakan ulangi proses.');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, []);
 
@@ -183,13 +206,22 @@ class AuthController extends Controller
     {
         try {
             $type = session('type');
+            $userId = session('userId');
             $email = session('email');
 
-            if (! $type || ! $email) {
+            if (! $type || ! $email || ! $userId) {
                 $this->loggingService->error('AuthController', 'Session tidak valid. Silakan ulangi proses');
+
+                return redirect()->back()->with('error', 'Session tidak valid. Silakan ulangi proses');
             }
 
-            $this->authService->resendOtp($email, $type);
+            if ($type === OtpType::Register->value) {
+                $user = $this->authService->getUserById($userId);
+
+                $this->authService->resendOtp($user->email, $type);
+            } elseif ($type == OtpType::Login->value) {
+                $this->authService->resendOtp($email, $type);
+            }
 
             return redirect()->back()->with('success', 'OTP telah dikirim. Cek Email anda');
         } catch (Exception $e) {
