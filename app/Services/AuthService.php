@@ -41,6 +41,15 @@ class AuthService
         return $user;
     }
 
+    public function editProfile(string $userId, array $data)
+    {
+        try {
+            $user = $this->authRepository->getUserById($userId);
+        } catch (Exception $e) {
+            throw new Exception(`Gagal untuk mengedit profile: ` . $e->getMessage());
+        }
+    }
+
     public function generateQrImage(string $userId)
     {
         try {
@@ -80,15 +89,15 @@ class AuthService
     {
         $user = $this->authRepository->getUserByEmail($data['email']);
 
-        if (! $user) {
+        if (!$user) {
             throw new Exception('Akun tidak ditemukan');
         }
 
-        if (! Hash::check($data['password'], $user->password)) {
+        if (!Hash::check($data['password'], $user->password)) {
             throw new Exception('Password tidak valid');
         }
 
-        if (! $user->email_verified_at) {
+        if (!$user->email_verified_at) {
             throw new Exception('Email belum terverifikasi');
         }
 
@@ -97,6 +106,40 @@ class AuthService
         Mail::to($user['email'])->send(new OtpMail($otp, 'Verifikasi Login'));
 
         return true;
+    }
+
+    public function login(array $data)
+    {
+        try {
+            $user = $this->getUserByEmail($data['email']);
+
+            if (!$user) {
+                throw new Exception('Akun dengan email ini tidak ditemukan');
+            }
+
+            if (!Hash::check($data['password'], $user->password)) {
+                throw new Exception('Password tidak valid');
+            }
+
+            if (!$user->email_verified_at) {
+                // Regenerate OTP for verification
+                $otp = $this->authRepository->generateOtp($user->email, OtpType::Register->value);
+                Mail::to($user->email)->send(new OtpMail($otp, 'Verifikasi Email'));
+
+                return [
+                    'success' => false,
+                    'code' => 403,
+                    'reason' => 'Email tidak terverifikasi',
+                    'email_verified_at' => $user->email_verified_at
+                ];
+            }
+
+            Auth::login($user);
+
+            return true;
+        } catch (Exception $e) {
+            throw new Exception('Gagal melakukan proses login: ' . $e->getMessage());
+        }
     }
 
     public function getUserByEmail(string $email)
@@ -113,7 +156,7 @@ class AuthService
     {
         $user = $this->authRepository->getUserByEmail($email);
 
-        if (! $user) {
+        if (!$user) {
             throw new Exception('Akun tidak ditemukan');
         }
 
@@ -132,7 +175,7 @@ class AuthService
             $this->authRepository->updateVerifiedEmail($email);
         }
 
-        if (! $result['success']) {
+        if (!$result['success']) {
             throw new Exception($result['message'] ?? 'OTP tidak valid');
         }
 
@@ -147,7 +190,7 @@ class AuthService
         // Update password
         $user = $this->authRepository->updatePasswordByEmail($email, $password);
 
-        if (! $user) {
+        if (!$user) {
             throw new Exception('Gagal mereset password');
         }
 
@@ -158,7 +201,7 @@ class AuthService
     {
         $user = $this->authRepository->getUserByEmail($email);
 
-        if (! $user && $otpType !== OtpType::Register->value) {
+        if (!$user && $otpType !== OtpType::Register->value) {
             throw new Exception('Akun tidak ditemukan');
         }
 

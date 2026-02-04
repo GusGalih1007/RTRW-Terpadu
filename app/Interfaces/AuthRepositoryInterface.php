@@ -5,6 +5,7 @@ namespace App\Interfaces;
 interface AuthRepositoryInterface
 {
     public function register(array $data);
+    public function editProfile(string $userId, array $data);
     public function getUserByEmail(string $email);
     public function getUserById(string $userId);
     public function updatePasswordById(string $userId, string $newPassword);

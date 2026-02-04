@@ -38,7 +38,8 @@ class Users extends Authenticatable
         'anggotaKeluarga',
         'latitude',
         'longitude',
-        'email_verified_at'
+        'email_verified_at',
+        'qrImage'
     ];
 
     protected $hidden = [

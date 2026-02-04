@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\OtpType;
+use Illuminate\Database\Eloquent\Prunable;
 
 class OtpCode extends Model
 {
@@ -48,4 +49,9 @@ class OtpCode extends Model
     {
         return ! is_null($this->usedAt);
     }
+
+    public static function prunable()
+    {
+        return static::where('created_at', '<', now()->subDay());
+    } 
 }

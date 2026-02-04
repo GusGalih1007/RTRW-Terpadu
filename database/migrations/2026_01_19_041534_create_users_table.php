@@ -19,10 +19,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->uuid('roleId')->nullable();
-            $table->integer('kodeProvinsi');
-            $table->integer('kodeKabupaten');
-            $table->integer('kodeKecamatan');
-            $table->integer('kodeKelurahan');
+            $table->integer('kodeProvinsi')->nullable();
+            $table->integer('kodeKabupaten')->nullable();
+            $table->integer('kodeKecamatan')->nullable();
+            $table->integer('kodeKelurahan')->nullable();
             $table->text('alamatDetail')->nullable();
             $table->string('pekerjaan', 100);
             $table->tinyInteger('anggotaKeluarga');

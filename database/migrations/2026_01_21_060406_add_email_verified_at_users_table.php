@@ -24,7 +24,7 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
 
-            $table->foreign('user_id')->references('userId')->on('users');
+            $table->foreign('user_id')->references('userId')->on('users')->onDelete('set null')->onUpdate('cascade');
         });
     }
 
