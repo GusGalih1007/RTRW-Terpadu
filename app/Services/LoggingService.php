@@ -10,12 +10,12 @@ class LoggingService
 {
     public function info($controller, string $message, array $context = [])
     {
-        Log::info('[' . $controller . ']->' . $message, $this->formatContext($context));
+        Log::info('[' . $controller . '] ' . $message, $this->formatContext($context));
     }
 
     public function warning($controller, string $message, array $context = [])
     {
-        Log::warning('[' . $controller . ']->' . $message, $this->formatContext($context));
+        Log::warning('[' . $controller . '] ' . $message, $this->formatContext($context));
     }
 
     public function error($controller, string $message, ?Throwable $e = null, array $context = [])
@@ -30,7 +30,7 @@ class LoggingService
             ];
         }
 
-        Log::error('[' . $controller . ']->' . $message, $this->formatContext($context));
+        Log::error('[' . $controller . '] ' . $message, $this->formatContext($context));
     }
 
     protected function formatContext(array $context = []): array

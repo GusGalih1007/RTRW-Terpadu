@@ -8,8 +8,10 @@ use App\Services\LoggingService;
 use App\Services\WilayahService;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use App\Mail\OtpMail;
+use App\Mail\RegisteredUserDataMail;
 
 class AuthController extends Controller
 {
@@ -44,7 +46,11 @@ class AuthController extends Controller
                     'request' => $validate->errors(),
                 ]);
 
-                return redirect()->back()->withErrors($validate->errors())->withInput($request->all())->with('error', 'Mohon lengkapi data anda');
+                return redirect()
+                    ->back()
+                    ->withErrors($validate->errors())
+                    ->withInput($request->all())
+                    ->with('error', 'Mohon lengkapi form yang diberikan');
             }
 
             $existingEmail = $this->authService->getUserByEmail($request->email);
@@ -57,7 +63,9 @@ class AuthController extends Controller
                     'type' => OtpType::Register->value,
                 ]);
 
-                return redirect()->route('auth.verify-otp')->with('success', 'Silakan verifikasi akun yang telah kamu buat');
+                return redirect()
+                    ->route('auth.verify-otp')
+                    ->with('success', 'Silakan verifikasi akun yang telah kamu buat');
             }
 
             $user = $this->authService->register($request->all());
@@ -67,23 +75,97 @@ class AuthController extends Controller
                 'type' => OtpType::Register->value,
             ]);
 
-            return redirect()->route('auth.verify-otp');
+            return redirect()
+                ->route('auth.verify-otp')
+                ->with('success', 'email');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, [
                 'request' => $request->all(),
             ]);
 
-            return redirect()->back()->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti');
+            return redirect()
+                ->back()
+                ->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti');
         }
     }
 
-    public function showQrImage(string $userId)
+    public function showRegisteredProfile(string $userId)
     {
         $user = $this->authService->getUserById($userId);
+        $provinces = $this->wilayahService->getProvinces();
 
-        // dd($user);
+        return view('auth.complete-profile', compact('user', 'provinces'));
+    }
 
-        return view('auth.showQr', compact('user'));
+    public function completeProfile(Request $request, string $userId)
+    {
+        try {
+            // dd($request->all());
+            $validate = Validator::make($request->all(), [
+                'nik' => ['required', 'numeric', 'min_digits:16', 'max_digits:16'],
+                'username' => ['required', 'string', 'min:2', 'max:80'],
+                'phone' => ['required', 'min_digits:10', 'max_digits:15'],
+                'kodeProvinsi' => ['required'],
+                'kodeKabupaten' => ['required'],
+                'kodeKecamatan' => ['required'],
+                'kodeKelurahan' => ['required'],
+                'alamatDetail' => ['required', 'string'],
+                'pekerjaan' => ['required', 'string'],
+                'anggotaKeluarga' => ['required', 'numeric']
+            ]);
+
+            if ($validate->fails()) {
+                $this->loggingService->error('AuthController', 'Kesalahan Validasi', null, [
+                    'request' => $validate->errors(),
+                ]);
+
+                return redirect()
+                    ->back()
+                    ->withErrors($validate->errors())
+                    ->withInput($request->all())
+                    ->with('error', 'Mohon lengkapi data anda');
+            }
+
+            $user = $this->authService->editProfile($userId, $request->all());
+
+            // Generate QR code for new user
+            $qrResult = $this->authService->generateQrImage($userId);
+
+            if ($qrResult['success']) {
+                $this->loggingService->info('AuthController', 'QR code berhasil dibuat untuk user baru', [
+                    'email' => $user->email,
+                    'qr_path' => $qrResult['qr_path'],
+                ]);
+            } else {
+                $this->loggingService->warning('AuthController', 'Gagal membuat QR code untuk user baru', [
+                    'email' => $user->email,
+                    'error' => $qrResult['message'],
+                ]);
+            }
+
+            // Send email with user data and QR code
+            try {
+                Mail::to($user->email)->send(new RegisteredUserDataMail($user));
+                
+                $this->loggingService->info('AuthController', 'Email data pendaftaran berhasil dikirim', [
+                    'email' => $user->email,
+                ]);
+            } catch (Exception $emailException) {
+                $this->loggingService->warning('AuthController', 'Gagal mengirim email data pendaftaran', [
+                    'email' => $user->email,
+                    'error' => $emailException->getMessage(),
+                ]);
+            }
+
+        } catch (Exception $e) {
+            $this->loggingService->error('AuthController', 'Terjadi Kesalahan Dalam sistem', $e, [
+                'request' => $request->all()
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Terjadi kesalahan dalam sistem dan gagal melengkapi data. Coba lagi nanti');
+        }
     }
 
     public function loginPage()
@@ -104,6 +186,12 @@ class AuthController extends Controller
                 $this->loggingService->error('AuthController', 'Gagal Validasi', null, [
                     'request' => $request->all(),
                 ]);
+
+                return redirect()
+                    ->back()
+                    ->withErrors($validate->errors())
+                    ->withInput($request->all())
+                    ->with('error', 'Mohon lengkapi form yang diberikan');
             }
 
             $user = $this->authService->getUserByEmail($request->email);
@@ -119,13 +207,17 @@ class AuthController extends Controller
                 'type' => OtpType::Login->value,
             ]);
 
-            return redirect()->route('auth.verify-otp');
+            return redirect()
+                ->route('auth.verify-otp')
+                ->with('success', 'login');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, [
                 'request' => $request->all(),
             ]);
 
-            return redirect()->back()->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti');
+            return redirect()
+                ->back()
+                ->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti');
         }
     }
 
@@ -170,30 +262,27 @@ class AuthController extends Controller
 
                     $this->authService->verifyOtp($user->email, $request->otp, $type);
 
-                    // Generate QR code for new user
-                    $qrResult = $this->authService->generateQrImage($userId);
-
-                    if ($qrResult['success']) {
-                        $this->loggingService->info('AuthController', 'QR code berhasil dibuat untuk user baru', [
-                            'email' => $user->email,
-                            'qr_path' => $qrResult['qr_path'],
-                        ]);
-                    } else {
-                        $this->loggingService->warning('AuthController', 'Gagal membuat QR code untuk user baru', [
-                            'email' => $user->email,
-                            'error' => $qrResult['message'],
-                        ]);
-                    }
-
-                    return redirect()->route('auth.show-user-qr', $userId)->with('success', 'Berhasil register. Silakan untuk login');
+                    return redirect()->route('auth.complete-profile', $userId)->with('success', 'Berhasil register. Silakan untuk login');
                 } elseif ($type == OtpType::Login->value) {
                     $user = $this->authService->getUserById($userId);
+
+                    if (!$user->email_verified_at) {
+                        $otp = $this->authService->generateOtp($user->email, OtpType::Register->value);
+
+                        Mail::to($user->email)->send(new OtpMail($otp, 'Verifikasi Email'));
+
+                        return redirect()
+                            ->route('auth.verify-otp')
+                            ->with('error', 'Anda belum dapat login karena email anda belum terverifikasi.');
+                    }
 
                     $this->authService->verifyOtp($user->email, $request->otp, $type);
 
                     $this->authService->login($request->all());
 
-                    return redirect()->route('welcome')->with('success', 'Login berhasil. Selamat datang');
+                    return redirect()
+                        ->route('welcome')
+                        ->with('success', 'Login berhasil. Selamat datang');
                 }
             }
             throw new Exception('Session tidak valid. Silakan ulangi proses.');
@@ -202,7 +291,9 @@ class AuthController extends Controller
                 'request' => $request->all()
             ]);
 
-            return redirect()->back()->with('error', 'Gagal verifikasi. Coba lagi nanti');
+            return redirect()
+                ->back()
+                ->with('error', 'Gagal verifikasi. Coba lagi nanti');
         }
     }
 
@@ -221,13 +312,17 @@ class AuthController extends Controller
 
             $this->authService->resendOtp($user->email, $type);
 
-            return redirect()->back()->with('success', 'OTP telah dikirim. Cek Email anda');
+            return redirect()
+                ->back()
+                ->with('success', 'OTP telah dikirim. Cek Email anda');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, [
-               'session' => session()
+                'session' => session()
             ]);
 
-            return redirect()->back()->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti');
+            return redirect()
+                ->back()
+                ->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti');
         }
     }
 
@@ -236,11 +331,15 @@ class AuthController extends Controller
         try {
             $this->authService->logout();
 
-            return redirect()->route('auth.login')->with('success', 'Berhasil logout');
+            return redirect()
+                ->route('auth.login')
+                ->with('success', 'Berhasil logout');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', 'Logout failed', $e, []);
 
-            return back()->with('error', 'Proses logout gagal. Coba lagi nanti');
+            return redirect()
+                ->back()
+                ->with('error', 'Proses logout gagal. Coba lagi nanti');
         }
     }
 }

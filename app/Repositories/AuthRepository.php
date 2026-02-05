@@ -8,6 +8,7 @@ use App\Models\Users;
 use App\Services\OtpService;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use PhpParser\Node\Expr;
 
@@ -28,7 +29,7 @@ class AuthRepository implements AuthRepositoryInterface
     public function register(array $data)
     {
         try {
-            $data['password'] = Hash::make($data['password']);
+            $data['password'] = Crypt::encrypt($data['password']);
             return $this->user->create($data);
         } catch (Exception $e) {
             throw new Exception('Gagal menyimpan data dalam database: ' . $e->getMessage());
@@ -45,9 +46,10 @@ class AuthRepository implements AuthRepositoryInterface
                 throw new Exception('Akun tidak ditemukan');
             }
 
-            return $user->update($data);
+            $user->update($data);
+            return $user->fresh();
         } catch (Exception $e) {
-            throw new Exception(`Gagal untuk merubah data dalam database: ` . $e->getMessage());
+            throw new Exception('Gagal untuk merubah data dalam database: ' . $e->getMessage());
         }
     }
 

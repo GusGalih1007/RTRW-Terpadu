@@ -9,16 +9,20 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class RegisteredUserData extends Mailable
+class RegisteredUserDataMail extends Mailable
 {
     use Queueable, SerializesModels;
+
+    public $user;
+    public $subjectText;
 
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($user, $subject = 'Data anda telah didaftarkan dalam RT/RW Terpadu')
     {
-        //
+        $this->user = $user;
+        $this->subjectText = $subject;
     }
 
     /**
@@ -27,7 +31,7 @@ class RegisteredUserData extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Registered User Data',
+            subject: $this->subject,
         );
     }
 
@@ -37,7 +41,7 @@ class RegisteredUserData extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'mails.registered-user',
         );
     }
 

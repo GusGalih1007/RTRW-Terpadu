@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'wilayah' => [
+        'base_url' => env('WILAYAH_API_BASE_URL', 'https://open-api.my.id/api/wilayah'),
+        'cache_ttl' => env('WILAYAH_CACHE_TTL', 86400), // 24 hours
+    ],
+
 ];

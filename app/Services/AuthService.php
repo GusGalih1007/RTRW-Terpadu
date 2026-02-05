@@ -44,9 +44,11 @@ class AuthService
     public function editProfile(string $userId, array $data)
     {
         try {
-            $user = $this->authRepository->getUserById($userId);
+            $user = $this->authRepository->editProfile($userId, $data);
+
+            return $user;
         } catch (Exception $e) {
-            throw new Exception(`Gagal untuk mengedit profile: ` . $e->getMessage());
+            throw new Exception('Gagal untuk mengedit profile: ' . $e->getMessage());
         }
     }
 
@@ -75,8 +77,6 @@ class AuthService
             $this->authRepository->saveQrImage($userId, $relativePath);
 
             return [
-                'success' => true,
-                'message' => 'QR code berhasil dibuat',
                 'qr_path' => $relativePath,
                 'qr_url' => Storage::url($relativePath),
             ];
@@ -121,24 +121,23 @@ class AuthService
                 throw new Exception('Password tidak valid');
             }
 
-            if (!$user->email_verified_at) {
-                // Regenerate OTP for verification
-                $otp = $this->authRepository->generateOtp($user->email, OtpType::Register->value);
-                Mail::to($user->email)->send(new OtpMail($otp, 'Verifikasi Email'));
-
-                return [
-                    'success' => false,
-                    'code' => 403,
-                    'reason' => 'Email tidak terverifikasi',
-                    'email_verified_at' => $user->email_verified_at
-                ];
-            }
-
             Auth::login($user);
 
             return true;
         } catch (Exception $e) {
             throw new Exception('Gagal melakukan proses login: ' . $e->getMessage());
+        }
+    }
+
+    public function checkEmailVerified(string $email)
+    {
+        try
+        {
+            $user = $this->getUserByEmail($email);
+    
+            return (bool) $user->email_verified_at;
+        } catch (Exception $e) {
+            throw new Exception('Gagal mengecek email verifikasi: ' . $e->getMessage());
         }
     }
 
@@ -167,16 +166,21 @@ class AuthService
         return true;
     }
 
+    public function generateOtp(string $email, string $type)
+    {
+        return $this->authRepository->generateOtp($email, $type);
+    }
+
     public function verifyOtp(string $email, string $otp, $otpType)
     {
         $result = $this->authRepository->otpVerify($email, $otp, $otpType);
+        
+        if (!$result['success']) {
+            throw new Exception($result['message'] ?? 'OTP tidak valid');
+        }
 
         if ($otpType === OtpType::Register->value) {
             $this->authRepository->updateVerifiedEmail($email);
-        }
-
-        if (!$result['success']) {
-            throw new Exception($result['message'] ?? 'OTP tidak valid');
         }
 
         return $result;
@@ -185,7 +189,7 @@ class AuthService
     public function resetPassword(string $email, string $otp, string $password)
     {
         // Verify OTP first
-        $this->verifyOtp($email, $otp, OtpType::ResetPassword);
+        $this->verifyOtp($email, $otp, OtpType::ResetPassword->value);
 
         // Update password
         $user = $this->authRepository->updatePasswordByEmail($email, $password);
@@ -230,8 +234,15 @@ class AuthService
 
     public function logout()
     {
-        Auth::logout();
-        session()->invalidate();
-        session()->regenerateToken();
+        try
+        {
+            Auth::logout();
+            session()->invalidate();
+            session()->regenerateToken();
+    
+            return true;
+        } catch (Exception $e) {
+            throw new Exception('Proses logout telah gagal: ' . $e->getMessage());
+        }
     }
 }
