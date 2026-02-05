@@ -129,17 +129,17 @@ class AuthController extends Controller
             $user = $this->authService->editProfile($userId, $request->all());
 
             // Generate QR code for new user
-            $qrResult = $this->authService->generateQrImage($userId);
-
-            if ($qrResult['success']) {
+            try {
+                $qrResult = $this->authService->generateQrImage($userId);
+                
                 $this->loggingService->info('AuthController', 'QR code berhasil dibuat untuk user baru', [
                     'email' => $user->email,
                     'qr_path' => $qrResult['qr_path'],
                 ]);
-            } else {
+            } catch (Exception $qrException) {
                 $this->loggingService->warning('AuthController', 'Gagal membuat QR code untuk user baru', [
                     'email' => $user->email,
-                    'error' => $qrResult['message'],
+                    'error' => $qrException->getMessage(),
                 ]);
             }
 
