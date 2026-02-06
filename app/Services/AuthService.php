@@ -7,6 +7,7 @@ use App\Interfaces\AuthRepositoryInterface;
 use App\Mail\OtpMail;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -61,10 +62,8 @@ class AuthService
             $fileName = "user_qr_{$userId}.png";
             $relativePath = "{$directory}/{$fileName}";
 
-            // Pastikan direktori ada (Laravel way)
             Storage::disk('public')->makeDirectory($directory);
 
-            // Generate QR code
             QrCode::format('png')
                 ->size(300)
                 ->margin(2)
@@ -89,37 +88,39 @@ class AuthService
     {
         $user = $this->authRepository->getUserByEmail($data['email']);
 
-        if (!$user) {
-            throw new Exception('Akun tidak ditemukan');
+        $encryptedPassword = $user->password;
+
+        try
+        {
+            $decryptedPassword = Crypt::decryptString($encryptedPassword);
+
+            if (!$data['password'] === $decryptedPassword) {
+                return [
+                    'success' => false,
+                    'reason' => 'Password tidak sesuai'
+                ];
+            }
+    
+            if (!$user->email_verified_at) {
+                return [
+                    'success' => false,
+                    'reason' => 'Email belum terverifikasi'
+                ];
+            }
+    
+            $otp = $this->authRepository->generateOtp($user->email, OtpType::Login->value);
+    
+            Mail::to($user['email'])->send(new OtpMail($otp, 'Verifikasi Login'));
+    
+            return true;
+        } catch (Exception $e) {
+            throw new Exception();
         }
-
-        if (!Hash::check($data['password'], $user->password)) {
-            throw new Exception('Password tidak valid');
-        }
-
-        if (!$user->email_verified_at) {
-            throw new Exception('Email belum terverifikasi');
-        }
-
-        $otp = $this->authRepository->generateOtp($user->email, OtpType::Login->value);
-
-        Mail::to($user['email'])->send(new OtpMail($otp, 'Verifikasi Login'));
-
-        return true;
     }
 
-    public function login(array $data)
+    public function login($user)
     {
         try {
-            $user = $this->getUserByEmail($data['email']);
-
-            if (!$user) {
-                throw new Exception('Akun dengan email ini tidak ditemukan');
-            }
-
-            if (!Hash::check($data['password'], $user->password)) {
-                throw new Exception('Password tidak valid');
-            }
 
             Auth::login($user);
 

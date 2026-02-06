@@ -55,7 +55,7 @@ class Users extends Authenticatable
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'password' => 'encrypted',
     ];
 
     public function role()

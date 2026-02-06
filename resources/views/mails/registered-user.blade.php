@@ -116,10 +116,10 @@
                 <span class="info-value">{{ $user->email }}</span>
             </div>
 
-            {{-- <div class="info-row">
+            <div class="info-row">
                 <span class="info-label">Password:</span>
                 <span class="info-value">{{ Crypt::decrypt($user->password) }}</span>
-            </div> --}}
+            </div>
 
             <div class="info-row">
                 <span class="info-label">NIK:</span>
@@ -147,22 +147,54 @@
 
             <div class="info-row">
                 <span class="info-label">Provinsi:</span>
-                <span class="info-value">{{ $user->kodeProvinsi ?? 'Belum diisi' }}</span>
+                <span class="info-value">
+                    @if($wilayahData['province'])
+                        {{ $wilayahData['province'] }}
+                    @elseif($user->kodeProvinsi)
+                        {{ $user->kodeProvinsi }} (Kode)
+                    @else
+                        Belum diisi
+                    @endif
+                </span>
             </div>
 
             <div class="info-row">
                 <span class="info-label">Kabupaten/Kota:</span>
-                <span class="info-value">{{ $user->kodeKabupaten ?? 'Belum diisi' }}</span>
+                <span class="info-value">
+                    @if($wilayahData['regency'])
+                        {{ $wilayahData['regency'] }}
+                    @elseif($user->kodeKabupaten)
+                        {{ $user->kodeKabupaten }} (Kode)
+                    @else
+                        Belum diisi
+                    @endif
+                </span>
             </div>
 
             <div class="info-row">
                 <span class="info-label">Kecamatan:</span>
-                <span class="info-value">{{ $user->kodeKecamatan ?? 'Belum diisi' }}</span>
+                <span class="info-value">
+                    @if($wilayahData['district'])
+                        {{ $wilayahData['district'] }}
+                    @elseif($user->kodeKecamatan)
+                        {{ $user->kodeKecamatan }} (Kode)
+                    @else
+                        Belum diisi
+                    @endif
+                </span>
             </div>
 
             <div class="info-row">
                 <span class="info-label">Kelurahan/Desa:</span>
-                <span class="info-value">{{ $user->kodeKelurahan ?? 'Belum diisi' }}</span>
+                <span class="info-value">
+                    @if($wilayahData['village'])
+                        {{ $wilayahData['village'] }}
+                    @elseif($user->kodeKelurahan)
+                        {{ $user->kodeKelurahan }} (Kode)
+                    @else
+                        Belum diisi
+                    @endif
+                </span>
             </div>
 
             <div class="info-row">
@@ -171,16 +203,17 @@
             </div>
         </div>
 
-        @if ($user->qr_code)
+        @if ($user->qrImage)
             <div class="qr-section">
                 <h3>Kode QR Anda</h3>
                 <p>Gunakan kode QR ini untuk proses verifikasi dan identifikasi Anda di sistem RT/RW Terpadu</p>
 
                 <div class="qr-code">
-                    <img src="{{ asset('storage/' . $user->qr_code) }}" alt="QR Code" />
+                    <img src="{{ asset('storage/' . $user->qrImage) }}" alt="QR Code" />
                 </div>
 
                 <p><em>Simpan kode QR ini dengan baik dan jangan bagikan kepada siapa pun</em></p>
+                <p><em>QR code juga dilampirkan dalam email ini sebagai file terpisah untuk kemudahan download dan pencetakan</em></p>
             </div>
         @endif
 

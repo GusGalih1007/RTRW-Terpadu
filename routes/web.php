@@ -42,3 +42,4 @@ Route::prefix('auth')->group(function () {
     Route::get('otp-verification/resend', [AuthController::class, 'resetOtp'])->name('auth.otp-verification.resend');
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout');
 });
+

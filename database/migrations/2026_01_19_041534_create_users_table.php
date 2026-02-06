@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('username', 80);
             $table->json('phone');
             $table->string('email')->unique();
-            $table->string('password');
+            $table->text('password');
             $table->uuid('roleId')->nullable();
             $table->integer('kodeProvinsi')->nullable();
             $table->integer('kodeKabupaten')->nullable();
