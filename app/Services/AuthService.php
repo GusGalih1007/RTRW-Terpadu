@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\OtpType;
+use App\Enums\UserRoleOption;
 use App\Interfaces\AuthRepositoryInterface;
 use App\Mail\OtpMail;
 use Exception;
@@ -31,6 +32,19 @@ class AuthService
         if ($existingUser) {
             throw new Exception('Email sudah terdaftar');
         }
+
+        switch ($data['roleId']) {
+            case 'Sub-Admin':
+                $data['roleId'] = UserRoleOption::SubAdmin->getUuid();
+                break;
+            case 'User':
+                $data['roleId'] = UserRoleOption::User->getUuid();
+                break;
+            default:
+                throw new Exception('Role untuk register user tidak dapat ditemukan');
+        }
+
+        // dd($data);
 
         $user = $this->authRepository->register($data);
 

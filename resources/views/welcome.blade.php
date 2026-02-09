@@ -37,14 +37,16 @@
                         >
                             Log in
                         </a>
-
-                        @if (Route::has('auth.register'))
-                            <a
-                                href="{{ route('auth.register') }}"
-                                class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
-                                Register
-                            </a>
-                        @endif
+                        <a
+                            href="{{ route('auth.register.rt-rw') }}"
+                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
+                            Register sebagai RT/RW
+                        </a>
+                        <a
+                            href="{{ route('auth.register.warga') }}"
+                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
+                            Register sebagai Warga
+                        </a>
                     @endauth
                 </nav>
             @endif

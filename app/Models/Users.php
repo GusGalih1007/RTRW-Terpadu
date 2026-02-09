@@ -29,11 +29,14 @@ class Users extends Authenticatable
         'email',
         'password',
         'roleId',
+        'roleVerifiedAt',
+        'roleVerifiedBy',
         'kodeProvinsi',
         'kodeKabupaten',
         'kodeKecamatan',
         'kodeKelurahan',
         'alamatDetail',
+        'rtRwId',
         'pekerjaan',
         'anggotaKeluarga',
         'latitude',
@@ -50,6 +53,9 @@ class Users extends Authenticatable
     protected $casts = [
         'userId' => 'string',
         'roleId' => 'string',
+        'roleverifiedAt' => 'datetime',
+        'roleVerifiedBy' => 'string',
+        'rtRwId' => 'string',
         'phone' => 'json',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -60,7 +66,12 @@ class Users extends Authenticatable
 
     public function role()
     {
-        $this->belongsTo(Role::class, 'roleId', 'roleId');
+        return $this->belongsTo(Role::class, 'roleId', 'roleId');
+    }
+
+    public function rtrw()
+    {
+        return $this->belongsTo(RtRw::class, 'rtRwId', 'rtRwId');
     }
 
     public static function prunable()

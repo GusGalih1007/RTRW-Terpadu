@@ -121,7 +121,7 @@
                 <span class="info-value">{{ Crypt::decrypt($user->password) }}</span>
             </div>
 
-            <div class="info-row">
+            {{-- <div class="info-row">
                 <span class="info-label">NIK:</span>
                 <span class="info-value">{{ $user->nik ?? 'Belum diisi' }}</span>
             </div>
@@ -139,10 +139,10 @@
             <div class="info-row">
                 <span class="info-label">Jumlah Anggota Keluarga:</span>
                 <span class="info-value">{{ $user->anggotaKeluarga ?? 'Belum diisi' }}</span>
-            </div>
+            </div> --}}
         </div>
 
-        <div class="user-info">
+        {{-- <div class="user-info">
             <h3>Alamat Lengkap</h3>
 
             <div class="info-row">
@@ -201,7 +201,7 @@
                 <span class="info-label">Alamat Detail:</span>
                 <span class="info-value">{{ $user->alamatDetail ?? 'Belum diisi' }}</span>
             </div>
-        </div>
+        </div> --}}
 
         @if ($user->qrImage)
             <div class="qr-section">

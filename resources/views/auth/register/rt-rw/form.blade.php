@@ -1,7 +1,19 @@
 <center>
-    <h2>Register</h2>
-    <form method="POST" action="{{ route('auth.register.post') }}">
+    <h2>Register Sebagai Ketua RT/RW</h2>
+    @if (session('error'))
+        <div>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if (session('success'))
+        <div>
+            {{ session('success') }}
+        </div>
+    @endif
+    <form method="POST" action="{{ route('auth.register.rt-rw.post') }}">
         {{ csrf_field() }}
+        <input type="hidden" value="Sub-Admin" name="roleId">
         <label>Email</label>
         <br>
         <input type="email" name="email" required><br><br>

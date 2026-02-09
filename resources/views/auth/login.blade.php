@@ -1,5 +1,16 @@
 <center>
     <h2>Login {{ Auth::user() }}</h2>
+    @if (session('error'))
+        <div>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if (session('success'))
+        <div>
+            {{ session('success') }}
+        </div>
+    @endif
     <form action="{{ route('auth.login.post') }}" method="POST">
         {{ csrf_field() }}
         <label for="email">E-mail</label><br>

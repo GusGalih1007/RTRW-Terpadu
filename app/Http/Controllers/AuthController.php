@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\OtpType;
+use App\Enums\UserRoleOption;
 use App\Services\AuthService;
 use App\Services\LoggingService;
 use App\Services\WilayahService;
@@ -28,9 +29,14 @@ class AuthController extends Controller
         $this->wilayahService = $wilayahService;
     }
 
-    public function registerPage()
+    public function registerWargaPage()
     {
-        return view('auth.register');
+        return view('auth.register.warga.form');
+    }
+
+    public function registerRtRwPage()
+    {
+        return view('auth.register.rt-rw.form');
     }
 
     public function register(Request $request)
@@ -39,7 +45,10 @@ class AuthController extends Controller
             $validate = Validator::make($request->all(), [
                 'email' => ['required', 'email'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
+                'roleId' => ['required', 'in:User,Admin,Sub-Admin']
             ]);
+
+            // dd($request->all());
 
             if ($validate->fails()) {
                 $this->loggingService->error('AuthController', 'Kesalahan Validasi', null, [
@@ -55,17 +64,23 @@ class AuthController extends Controller
 
             $existingEmail = $this->authService->getUserByEmail($request->email);
 
-            if ($existingEmail && $existingEmail->email_verified_at != null) {
-                $this->authService->resendOtp($existingEmail->email, OtpType::Register->value);
-
-                session([
-                    'userId' => $existingEmail->userId,
-                    'type' => OtpType::Register->value,
-                ]);
+            if ($existingEmail) {
+                if ($existingEmail->email_verified_at != null) {
+                    $this->authService->resendOtp($existingEmail->email, OtpType::Register->value);
+    
+                    session([
+                        'userId' => $existingEmail->userId,
+                        'type' => OtpType::Register->value,
+                    ]);
+    
+                    return redirect()
+                        ->route('auth.verify-otp')
+                        ->with('success', 'Silakan verifikasi akun yang telah kamu buat');
+                }
 
                 return redirect()
-                    ->route('auth.verify-otp')
-                    ->with('success', 'Silakan verifikasi akun yang telah kamu buat');
+                ->back()
+                ->with('error', 'Akun sudah terdaftar');
             }
 
             $user = $this->authService->register($request->all());
@@ -76,8 +91,7 @@ class AuthController extends Controller
             ]);
 
             return redirect()
-                ->route('auth.verify-otp')
-                ->with('success', 'email');
+                ->route('auth.verify-otp');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, [
                 'request' => $request->all(),
@@ -89,12 +103,20 @@ class AuthController extends Controller
         }
     }
 
-    public function showRegisteredProfile(string $userId)
+    public function showRegisteredRtRw(string $userId)
     {
         $user = $this->authService->getUserById($userId);
         $provinces = $this->wilayahService->getProvinces();
 
-        return view('auth.complete-profile', compact('user', 'provinces'));
+        return view('auth.register.rt-rw.complete-profile', compact('user', 'provinces'));
+    }
+
+    public function showRegisteredWarga(string $userId)
+    {
+        $user = $this->authService->getUserById($userId);
+        $provinces = $this->wilayahService->getProvinces();
+
+        return view('auth.register.warga.complete-profile', compact('user', 'provinces'));
     }
 
     public function completeProfile(Request $request, string $userId)
@@ -281,9 +303,10 @@ class AuthController extends Controller
 
                     $this->authService->verifyOtp($user->email, $request->otp, $type);
 
-                    return redirect()
-                    ->route('auth.complete-profile', $userId)
-                    ->with('success', 'Silakan untuk mengisi data lengkap anda');
+                    return match($user->roleId) {
+                        UserRoleOption::SubAdmin->getUuid() => redirect()->route('auth.complete-profile.rt-rw', $userId)->with('success', 'Silakan untuk mengisi data lengkap anda'),
+                        UserRoleOption::User->getUuid() => redirect()->route('auth.complete-profile.warga', $userId)->with('success', 'Silakan untuk mengisi data lengkap anda'),
+                    };
                 } elseif ($type == OtpType::Login->value) {
                     $user = $this->authService->getUserById($userId);
 
