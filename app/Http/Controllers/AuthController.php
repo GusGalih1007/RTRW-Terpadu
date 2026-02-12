@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\OtpMail;
 use App\Mail\RegisteredUserDataMail;
+use App\Models\RtRw;
 
 class AuthController extends Controller
 {
@@ -106,23 +107,43 @@ class AuthController extends Controller
     public function showRegisteredRtRw(string $userId)
     {
         $user = $this->authService->getUserById($userId);
+        $rtrws = RtRw::get();
         $provinces = $this->wilayahService->getProvinces();
 
-        return view('auth.register.rt-rw.complete-profile', compact('user', 'provinces'));
+        return view('auth.register.rt-rw.complete-profile', compact('user', 'provinces', 'rtrws'));
     }
 
     public function showRegisteredWarga(string $userId)
     {
         $user = $this->authService->getUserById($userId);
+        $rtrws = RtRw::get();
         $provinces = $this->wilayahService->getProvinces();
 
-        return view('auth.register.warga.complete-profile', compact('user', 'provinces'));
+        return view('auth.register.warga.complete-profile', compact('user', 'provinces', 'rtrws'));
     }
 
     public function completeProfile(Request $request, string $userId)
     {
         try {
-            // dd($request->all());
+            // Debug: Log the incoming request data
+            $this->loggingService->info('AuthController', 'Complete profile request received', [
+                'user_id' => $userId,
+                'request_data' => $request->all()
+            ]);
+
+            // Check if rtRwId is undefined
+            if ($request->rtRwId === 'undefined') {
+                $this->loggingService->error('AuthController', 'rtRwId is undefined', null, [
+                    'user_id' => $userId,
+                    'request_data' => $request->all()
+                ]);
+
+                return redirect()
+                    ->back()
+                    ->withInput($request->all())
+                    ->with('error', 'Mohon pilih RT/RW terlebih dahulu');
+            }
+
             $validate = Validator::make($request->all(), [
                 'nik' => ['required', 'numeric', 'min_digits:16', 'max_digits:16'],
                 'username' => ['required', 'string', 'min:2', 'max:80'],
@@ -131,6 +152,7 @@ class AuthController extends Controller
                 'kodeKabupaten' => ['required'],
                 'kodeKecamatan' => ['required'],
                 'kodeKelurahan' => ['required'],
+                'rtRwId' => ['required', 'uuid'], // Add UUID validation
                 'alamatDetail' => ['required', 'string'],
                 'pekerjaan' => ['required', 'string'],
                 'anggotaKeluarga' => ['required', 'numeric']

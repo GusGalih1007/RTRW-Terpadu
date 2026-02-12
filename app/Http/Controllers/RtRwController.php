@@ -68,7 +68,15 @@ class RtRwController extends Controller
                     ->with('error', 'Mohon lengkapi form yang diberikan');
             }
 
-            $newData = $this->rtrwRepository->store($request->all());
+            $input = [
+                'nomor' => $request->rt . '/' . $request->rw,
+                'kodeProvinsi' =>  $request->kodeProvinsi,
+                'kodeKabupaten' => $request->kodeKabupaten,
+                'kodeKecamatan' => $request->kodeKecamatan,
+                'kodeKelurahan' => $request->kodeKelurahan,
+            ];
+
+            $newData = $this->rtrwRepository->store($input);
 
             if ($request->ajax()) {
                 return response()->json(
@@ -121,5 +129,35 @@ class RtRwController extends Controller
     public function destroy(RtRw $rtRw)
     {
         //
+    }
+
+    public function apiGetByKelurahan(int $kelurahanId)
+    {
+        try {
+            $rtrws = $this->rtrwRepository->getByKelurahan($kelurahanId);
+
+            // Transform data to match frontend expectations
+            $transformedData = $rtrws->map(function ($rtrw) {
+                return [
+                    'rtRwId' => $rtrw->rtRwId,
+                    'nomor' => $rtrw->nomor,
+                    'kodeKelurahan' => $rtrw->kodeKelurahan,
+                    'created_at' => $rtrw->created_at,
+                    'updated_at' => $rtrw->updated_at
+                ];
+            });
+
+            return response()->json($transformedData, 200);
+        } catch (Exception $e) {
+            $this->loggingService->error('RtRwController', 'Gagal mengambil data RT/RW berdasarkan kelurahan', $e, [
+                'kelurahanId' => $kelurahanId,
+                'method' => 'apiGetByKelurahan'
+            ]);
+
+            return response()->json([
+                'message' => 'Gagal mengambil data RT/RW',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

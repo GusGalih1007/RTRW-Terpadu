@@ -1,35 +1,15 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RtRwController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-// API routes for wilayah data
-Route::prefix('api/wilayah')->group(function () {
-    Route::get('/provinces', function () {
-        $wilayahService = app(\App\Services\WilayahService::class);
-        return response()->json($wilayahService->getProvinces());
-    });
 
-    Route::get('/regencies/{provinceId}', function ($provinceId) {
-        $wilayahService = app(\App\Services\WilayahService::class);
-        return response()->json($wilayahService->getRegencies($provinceId));
-    });
-
-    Route::get('/districts/{regencyId}', function ($regencyId) {
-        $wilayahService = app(\App\Services\WilayahService::class);
-        return response()->json($wilayahService->getDistricts($regencyId));
-    });
-
-    Route::get('/villages/{districtId}', function ($districtId) {
-        $wilayahService = app(\App\Services\WilayahService::class);
-        return response()->json($wilayahService->getVillages($districtId));
-    });
-});
-
+// list of auth route
 Route::prefix('auth')->group(function () {
 
     // Register
@@ -69,4 +49,9 @@ Route::prefix('auth')->group(function () {
     // Logout
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout');
 });
+
+// list of sub-admin user route
+Route::prefix('sub-admin')->name('sub-admin')->group(function () {
+    Route::post('rt-rw', [RtRwController::class, 'store'])->name('.rt-rw.store');
+})->middleware(['web']);
 

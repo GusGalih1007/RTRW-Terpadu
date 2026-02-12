@@ -10,4 +10,5 @@ interface RtRwRepositoryInterface
     public function update(string $id, array $data);
     public function delete(string $id);
     public function dataExist(string $id);
+    public function getByKelurahan(int $id);
 }
