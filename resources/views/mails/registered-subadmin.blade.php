@@ -88,13 +88,20 @@
             border-left: 4px solid #007bff;
             margin: 20px 0;
         }
+
+        .highlight-orange {
+            background-color: #fdf5e3;
+            padding: 15px;
+            border-left: 4px solid #ff9d00;
+            margin: 20px 0;
+        }
     </style>
 </head>
 
 <body>
     <div class="header">
         <h1>RT/RW Terpadu</h1>
-        <h2>Data Pendaftaran Anda</h2>
+        <h2>Data Pendaftaran Anda sebagai Ketua RT/RW</h2>
     </div>
 
     <div class="content">
@@ -102,22 +109,26 @@
             <p><strong>Terima kasih telah mendaftar!</strong> Data Anda telah berhasil disimpan dalam sistem RT/RW
                 Terpadu.</p>
         </div>
+        <div class="highlight-orange">
+            <p><strong>Catatan penting!</strong> Sebelum anda dapat menggunakan aplikasi sebagi ketua RT/RW, kami perlu
+                memverifikasi kedudukan anda sebagai ketua RT/RW untuk menghindari penyalahgunaan oleh pihak tidak bertanggung jawab</p>
+        </div>
 
         <div class="user-info">
             <h3>Informasi Pengguna</h3>
 
             <div class="info-row">
-                <span class="info-label">Nama Lengkap: </span>
+                <span class="info-label">Nama Lengkap:</span>
                 <span class="info-value">{{ $user->username ?? 'Belum diisi' }}</span>
             </div>
 
             <div class="info-row">
-                <span class="info-label">Email: </span>
+                <span class="info-label">Email:</span>
                 <span class="info-value">{{ $user->email }}</span>
             </div>
 
             <div class="info-row">
-                <span class="info-label">Password: </span>
+                <span class="info-label">Password:</span>
                 <span class="info-value">{{ Crypt::decrypt($user->password) }}</span>
             </div>
 
@@ -146,7 +157,7 @@
             <h3>Alamat Lengkap</h3>
 
             <div class="info-row">
-                <span class="info-label">Provinsi: </span>
+                <span class="info-label">Provinsi:</span>
                 <span class="info-value">
                     @if($wilayahData['province'])
                         {{ $wilayahData['province'] }}
@@ -159,7 +170,7 @@
             </div>
 
             <div class="info-row">
-                <span class="info-label">Kabupaten/Kota: </span>
+                <span class="info-label">Kabupaten/Kota:</span>
                 <span class="info-value">
                     @if($wilayahData['regency'])
                         {{ $wilayahData['regency'] }}
@@ -172,7 +183,7 @@
             </div>
 
             <div class="info-row">
-                <span class="info-label">Kecamatan: </span>
+                <span class="info-label">Kecamatan:</span>
                 <span class="info-value">
                     @if($wilayahData['district'])
                         {{ $wilayahData['district'] }}
@@ -185,7 +196,7 @@
             </div>
 
             <div class="info-row">
-                <span class="info-label">Kelurahan/Desa: </span>
+                <span class="info-label">Kelurahan/Desa:</span>
                 <span class="info-value">
                     @if($wilayahData['village'])
                         {{ $wilayahData['village'] }}
@@ -198,14 +209,14 @@
             </div>
 
             <div class="info-row">
-                <span class="info-label">Nomor RT/RW: </span>
+                <span class="info-label">Nomor RT/RW</span>
                 <span class="info-value">
                     {{ $user->rtrw->nomor }}
                 </span>
             </div>
 
             <div class="info-row">
-                <span class="info-label">Alamat Detail: </span>
+                <span class="info-label">Alamat Detail:</span>
                 <span class="info-value">{{ $user->alamatDetail ?? 'Belum diisi' }}</span>
             </div>
         </div>
@@ -228,7 +239,7 @@
             <p><strong>Catatan Penting:</strong></p>
             <ul>
                 <li>Data ini disimpan secara aman dalam database RT/RW Terpadu</li>
-                <li>Jika ada perubahan data, silakan hubungi petugas RT/RW setempat</li>
+                {{-- <li>Jika ada perubahan data, silakan hubungi admin secara langsung</li> --}}
                 <li>Kode QR ini bersifat pribadi dan tidak dapat diganti</li>
                 <li>Untuk pertanyaan lebih lanjut, silakan hubungi admin RT/RW</li>
             </ul>

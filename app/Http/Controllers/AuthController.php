@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\OtpMail;
 use App\Mail\RegisteredUserDataMail;
+use App\Mail\RegisteredSubAdminDataMail;
 use App\Models\RtRw;
 
 class AuthController extends Controller
@@ -66,7 +67,7 @@ class AuthController extends Controller
             $existingEmail = $this->authService->getUserByEmail($request->email);
 
             if ($existingEmail) {
-                if ($existingEmail->email_verified_at != null) {
+                if ($existingEmail->email_verified_at == null) {
                     $this->authService->resendOtp($existingEmail->email, OtpType::Register->value);
     
                     session([
@@ -145,7 +146,7 @@ class AuthController extends Controller
             }
 
             $validate = Validator::make($request->all(), [
-                'nik' => ['required', 'numeric', 'min_digits:16', 'max_digits:16'],
+                'nik' => ['required', 'integer', 'min_digits:16', 'max_digits:16'],
                 'username' => ['required', 'string', 'min:2', 'max:80'],
                 'phone' => ['required', 'min_digits:10', 'max_digits:15'],
                 'kodeProvinsi' => ['required'],
@@ -191,17 +192,45 @@ class AuthController extends Controller
             }
 
             // Send email with user data and QR code
-            try {
-                Mail::to($user->email)->send(new RegisteredUserDataMail($user));
-                
-                $this->loggingService->info('AuthController', 'Email data pendaftaran berhasil dikirim', [
-                    'email' => $user->email,
-                ]);
-            } catch (Exception $emailException) {
-                $this->loggingService->warning('AuthController', 'Gagal mengirim email data pendaftaran', [
-                    'email' => $user->email,
-                    'error' => $emailException->getMessage(),
-                ]);
+            switch ($user->roleId) {
+                case UserRoleOption::SubAdmin->getUuid():
+                    try {
+                        Mail::to($user->email)->send(new RegisteredSubAdminDataMail($user));
+                        
+                        $this->loggingService->info('AuthController', 'Email data pendaftaran berhasil dikirim', [
+                            'email' => $user->email,
+                        ]);
+                    } catch (Exception $emailException) {
+                        $this->loggingService->warning('AuthController', 'Gagal mengirim email data pendaftaran', [
+                            'email' => $user->email,
+                            'error' => $emailException->getMessage(),
+                        ]);
+                        return redirect()
+                            ->back()
+                            ->withInput($request->all())
+                            ->with('error', 'Terjadi kesalahan saat mengirim email. Coba lagi nanti');
+                    }
+                    break;
+                case UserRoleOption::User->getUuid():
+                    try {
+                        Mail::to($user->email)->send(new RegisteredUserDataMail($user));
+                        
+                        $this->loggingService->info('AuthController', 'Email data pendaftaran berhasil dikirim', [
+                            'email' => $user->email,
+                        ]);
+                    } catch (Exception $emailException) {
+                        $this->loggingService->warning('AuthController', 'Gagal mengirim email data pendaftaran', [
+                            'email' => $user->email,
+                            'error' => $emailException->getMessage(),
+                        ]);
+                        return redirect()
+                            ->back()
+                            ->withInput($request->all())
+                            ->with('error', 'Terjadi kesalahan saat mengirim email. Coba lagi nanti');
+                    }
+                    break;
+                default:
+                    throw new Exception('Role user tidak dapat terbaca');
             }
 
             $this->authService->login($user);

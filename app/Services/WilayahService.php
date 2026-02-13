@@ -166,18 +166,6 @@ class WilayahService
         });
     }
     
-    public function clearCache(string $key = null): void
-    {
-        if ($key) {
-            Cache::forget($key);
-        } else {
-            // Clear all wilayah cache
-            Cache::forget('provinces');
-            // You might want to implement a more sophisticated cache clearing mechanism
-            // if you need to clear all regencies, districts, etc.
-        }
-    }
-    
     public function testApiConnection(): array
     {
         try {

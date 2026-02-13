@@ -8,10 +8,10 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Services\WilayahService;
 use App\Models\Users;
+use App\Services\WilayahService;
 
-class RegisteredUserDataMail extends Mailable
+class RegisteredSubAdminDataMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -83,7 +83,7 @@ class RegisteredUserDataMail extends Mailable
     public function build()
     {
         return $this->subject($this->subjectText)
-                    ->view('mails.registered-user')
+                    ->view('mails.registered-subadmin')
                     ->with([
                         'user' => $this->user,
                     ]);

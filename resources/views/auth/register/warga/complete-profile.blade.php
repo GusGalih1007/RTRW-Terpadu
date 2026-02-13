@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -203,22 +204,24 @@
         }
 
         @media (max-width: 768px) {
+
             .form-row,
             .form-row-3,
             .form-row-4 {
                 grid-template-columns: 1fr;
             }
-            
+
             .container {
                 padding: 0 15px;
             }
-            
+
             .card {
                 padding: 20px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="card">
@@ -227,19 +230,20 @@
                 <p>Lengkapi Data Diri Anda</p>
             </div>
 
-            @if(session('error'))
+            @if (session('error'))
                 <div class="alert alert-danger">
                     {{ session('error') }}
                 </div>
             @endif
 
-            @if(session('success'))
+            @if (session('success'))
                 <div class="alert alert-success">
                     {{ session('success') }}
                 </div>
             @endif
 
-            <form action="{{ route('auth.complete-profile.warga.post', $user->userId) }}" method="POST" id="completeProfileForm">
+            <form action="{{ route('auth.complete-profile.warga.post', $user->userId) }}" method="POST"
+                id="completeProfileForm">
                 @csrf
                 @method('PUT')
 
@@ -285,8 +289,9 @@
                         <label for="kodeProvinsi">Provinsi <span class="required">*</span></label>
                         <select id="kodeProvinsi" name="kodeProvinsi" required>
                             <option value="">Pilih Provinsi</option>
-                            @foreach($provinces as $province)
-                                <option value="{{ $province['id'] }}" {{ old('kodeProvinsi') == $province['id'] ? 'selected' : '' }}>
+                            @foreach ($provinces as $province)
+                                <option value="{{ $province['id'] }}"
+                                    {{ old('kodeProvinsi') == $province['id'] ? 'selected' : '' }}>
                                     {{ $province['name'] }}
                                 </option>
                             @endforeach
@@ -298,7 +303,7 @@
 
                     <div class="form-group">
                         <label for="kodeKabupaten">Kabupaten/Kota <span class="required">*</span></label>
-                        <select id="kodeKabupaten" name="kodeKabupaten" required>
+                        <select id="kodeKabupaten" name="kodeKabupaten" required disabled>
                             <option value="">Pilih Kabupaten/Kota</option>
                         </select>
                         @error('kodeKabupaten')
@@ -308,7 +313,7 @@
 
                     <div class="form-group">
                         <label for="kodeKecamatan">Kecamatan <span class="required">*</span></label>
-                        <select id="kodeKecamatan" name="kodeKecamatan" required>
+                        <select id="kodeKecamatan" name="kodeKecamatan" required disabled>
                             <option value="">Pilih Kecamatan</option>
                         </select>
                         @error('kodeKecamatan')
@@ -320,38 +325,58 @@
                 <div class="form-row-3">
                     <div class="form-group">
                         <label for="kodeKelurahan">Kelurahan/Desa <span class="required">*</span></label>
-                        <select id="kodeKelurahan" name="kodeKelurahan" required>
+                        <select id="kodeKelurahan" name="kodeKelurahan" required disabled>
                             <option value="">Pilih Kelurahan/Desa</option>
                         </select>
                         @error('kodeKelurahan')
                             <div class="error-message" style="display: block;">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    <div class="form-group">
+                        <label for="rtRwId">RT/RW <span class="required">*</span></label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <select id="rtRwId" name="rtRwId" required style="flex: 1;" disabled>
+                                <option value="" selected hidden>Pilih RT/RW</option>
+                                @if ($rtrws != null)
+                                    @foreach ($rtrws as $rtrw)
+                                        <option value="{{ $rtrw->rtRwId }}"
+                                            {{ old('rtRwId') == $rtrw->rtRwId ? 'selected' : '' }}>
+                                            {{ $rtrw->nomor }}
+                                        </option>
+                                    @endforeach
+                                @else
+                                    <option value="">Tidak ada data RT/RW</option>
+                                @endif
+                            </select>
+                        </div>
+                        @error('rtRwId')
+                        <div class="error-message" style="display: block;">{{ $message }}</div>
+                        @enderror
+                    </div>
                     
                     <div class="form-group">
-                        <label for="rt-rw">RT/RW<span class="required">*</span></label>
-                        <select id="rt-rw" name="rt-rw" required>
-                            <option value="">Pilih RT/RW</option>
-                        </select>
-                        @error('rt-rw')
-                            <div class="error-message" style="display: block;">{{ $message }}</div>
-                        @enderror
+                        <div>
+                            <small>RT/RW anda belum terdaftar? Hubungi petugas RT/RW setempat untuk mendaftarkan RT/RW kamu</small>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="pekerjaan">Pekerjaan <span class="required">*</span></label>
-                        <input type="text" id="pekerjaan" name="pekerjaan" value="{{ old('pekerjaan') }}" required>
+                        <input type="text" id="pekerjaan" name="pekerjaan" value="{{ old('pekerjaan') }}"
+                            required>
                         <span class="text-muted">Pekerjaan utama Anda</span>
                         @error('pekerjaan')
                             <div class="error-message" style="display: block;">{{ $message }}</div>
                         @enderror
                     </div>
-    
+
                     <div class="form-group">
                         <label for="anggotaKeluarga">Jumlah Anggota Keluarga <span class="required">*</span></label>
-                        <input type="number" id="anggotaKeluarga" name="anggotaKeluarga" value="{{ old('anggotaKeluarga') }}" required>
+                        <input type="number" id="anggotaKeluarga" name="anggotaKeluarga"
+                            value="{{ old('anggotaKeluarga') }}" required>
                         <span class="text-muted">Termasuk Anda</span>
                         @error('anggotaKeluarga')
                             <div class="error-message" style="display: block;">{{ $message }}</div>
@@ -384,7 +409,7 @@
             const progressFill = document.getElementById('progressFill');
             const progressText = document.getElementById('progressText');
             const requiredFields = form.querySelectorAll('[required]');
-            
+
             // Update progress bar
             function updateProgress() {
                 let completed = 0;
@@ -393,7 +418,7 @@
                         completed++;
                     }
                 });
-                
+
                 const percentage = Math.round((completed / requiredFields.length) * 100);
                 progressFill.style.width = percentage + '%';
                 progressText.textContent = percentage + '%';
@@ -407,7 +432,7 @@
             // Form validation
             form.addEventListener('submit', function(e) {
                 let isValid = true;
-                
+
                 requiredFields.forEach(field => {
                     if (field.value.trim() === '') {
                         isValid = false;
@@ -439,6 +464,13 @@
                 kabupatenSelect.innerHTML = '<option value="">Memuat...</option>';
                 kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
                 kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
+                rtRwId.innerHTML = '<option value="" selected hidden>Pilih RT/RW</option>';
+                rtRwId.disabled = true;
+
+                // Enable kabupaten select
+                kabupatenSelect.disabled = false;
+                kecamatanSelect.disabled = true;
+                kelurahanSelect.disabled = true;
 
                 if (provinsiId) {
                     fetch(`/api/wilayah/regencies/${provinsiId}`)
@@ -450,8 +482,9 @@
                         })
                         .then(data => {
                             console.log('Regencies data:', data);
-                            kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-                            
+                            kabupatenSelect.innerHTML =
+                            '<option value="">Pilih Kabupaten/Kota</option>';
+
                             if (Array.isArray(data) && data.length > 0) {
                                 data.forEach(kabupaten => {
                                     const option = document.createElement('option');
@@ -467,6 +500,10 @@
                             console.error('Error fetching regencies:', error);
                             kabupatenSelect.innerHTML = '<option value="">Gagal memuat data</option>';
                         });
+                } else {
+                    kabupatenSelect.disabled = true;
+                    kecamatanSelect.disabled = true;
+                    kelurahanSelect.disabled = true;
                 }
             });
 
@@ -475,6 +512,12 @@
                 const kabupatenId = this.value;
                 kecamatanSelect.innerHTML = '<option value="">Memuat...</option>';
                 kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
+                rtRwId.innerHTML = '<option value="" selected hidden>Pilih RT/RW</option>';
+                rtRwId.disabled = true;
+
+                // Enable kecamatan select
+                kecamatanSelect.disabled = false;
+                kelurahanSelect.disabled = true;
 
                 if (kabupatenId) {
                     fetch(`/api/wilayah/districts/${kabupatenId}`)
@@ -487,7 +530,7 @@
                         .then(data => {
                             console.log('Districts data:', data);
                             kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
-                            
+
                             if (Array.isArray(data) && data.length > 0) {
                                 data.forEach(kecamatan => {
                                     const option = document.createElement('option');
@@ -503,6 +546,9 @@
                             console.error('Error fetching districts:', error);
                             kecamatanSelect.innerHTML = '<option value="">Gagal memuat data</option>';
                         });
+                } else {
+                    kecamatanSelect.disabled = true;
+                    kelurahanSelect.disabled = true;
                 }
             });
 
@@ -510,6 +556,11 @@
             kecamatanSelect.addEventListener('change', function() {
                 const kecamatanId = this.value;
                 kelurahanSelect.innerHTML = '<option value="">Memuat...</option>';
+                rtRwId.innerHTML = '<option value="" selected hidden>Pilih RT/RW</option>';
+                rtRwId.disabled = true;
+
+                // Enable kelurahan select
+                kelurahanSelect.disabled = false;
 
                 if (kecamatanId) {
                     fetch(`/api/wilayah/villages/${kecamatanId}`)
@@ -521,8 +572,9 @@
                         })
                         .then(data => {
                             console.log('Villages data:', data);
-                            kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
-                            
+                            kelurahanSelect.innerHTML =
+                            '<option value="">Pilih Kelurahan/Desa</option>';
+
                             if (Array.isArray(data) && data.length > 0) {
                                 data.forEach(kelurahan => {
                                     const option = document.createElement('option');
@@ -538,12 +590,69 @@
                             console.error('Error fetching villages:', error);
                             kelurahanSelect.innerHTML = '<option value="">Gagal memuat data</option>';
                         });
+                } else {
+                    kelurahanSelect.disabled = true;
                 }
+            });
+
+            kelurahanSelect.addEventListener('change', function() {
+                const kelurahanId = this.value;
+                rtRwId.innerHTML = '<option value="" selected hidden>Memuat...</option>';
+                rtRwId.disabled = true;
+
+                if (!kelurahanId) {
+                    rtRwId.innerHTML = '<option value="" selected hidden>Pilih RT/RW</option>';
+                    rtRwId.disabled = true;
+                    return;
+                }
+
+                fetch(`/api/rt-rw/kelurahan/${kelurahanId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Clear and set placeholder
+                        rtRwId.innerHTML = '<option value="" selected hidden>Pilih RT/RW</option>';
+
+                        console.log();
+
+                        if (Array.isArray(data) && data.length > 0) {
+                            data.forEach(rtrw => {
+                                const option = document.createElement('option');
+                                option.value = rtrw.rtRwId; // ← note: key is rtRwId, not id
+                                option.textContent = rtrw.nomor;
+                                rtRwId.appendChild(option);
+                            });
+                            rtRwId.disabled = false;
+                        } else {
+                            const noDataOption = document.createElement('option');
+                            noDataOption.value = '';
+                            noDataOption.textContent = 'Tidak ada data RT/RW';
+                            noDataOption.disabled = true;
+                            rtRwId.appendChild(noDataOption);
+                            rtRwId.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching RT/RW:', error);
+                        rtRwId.innerHTML = '<option value="">Gagal memuat data</option>';
+                        rtRwId.disabled = false;
+                    });
             });
 
             // Initial progress update
             updateProgress();
+
+            // Set initial disabled states
+            kabupatenSelect.disabled = true;
+            kecamatanSelect.disabled = true;
+            kelurahanSelect.disabled = true;
+            rtRwId.disabled = true;
         });
     </script>
 </body>
+
 </html>

@@ -514,20 +514,20 @@
                                 @endif
                             </select>
                         </div>
+                        @error('rtRwId')
+                        <div class="error-message" style="display: block;">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    
+                    <div class="form-group">
+                        {{-- <button type="button" class="btn-secondary" style="padding: 12px 16px; font-size: 14px; white-space: nowrap;" onclick="openRtRwModal()">
+                            + Tambah RT/RW
+                        </button> --}}
                         <div>
                             <small>RT/RW anda belum terdaftar? <a href="#"
                                     onclick="openRtRwModal(); return false;">Daftarkan</a></small>
                         </div>
-                        @error('rtRwId')
-                            <div class="error-message" style="display: block;">{{ $message }}</div>
-                        @enderror
                     </div>
-
-                    {{-- <div class="form-group">
-                        <button type="button" class="btn-secondary" style="padding: 12px 16px; font-size: 14px; white-space: nowrap;" onclick="openRtRwModal()">
-                            + Tambah RT/RW
-                        </button>
-                    </div> --}}
                 </div>
 
                 <div class="form-row">
