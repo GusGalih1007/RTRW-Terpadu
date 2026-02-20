@@ -227,7 +227,7 @@
                 <p>Gunakan kode QR ini untuk proses verifikasi dan identifikasi Anda di sistem RT/RW Terpadu</p>
 
                 <div class="qr-code">
-                    <img src="{{ asset('storage/' . $user->qrImage) }}" alt="QR Code" />
+                    <img src="{{ public_path('storage/' . $user->qrImage) }}" alt="QR Code" />
                 </div>
 
                 <p><em>Simpan kode QR ini dengan baik dan jangan bagikan kepada siapa pun</em></p>

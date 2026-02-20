@@ -17,7 +17,7 @@ return new class extends Migration
             $table->json('phone')->nullable()->change();
             $table->string('pekerjaan', 100)->nullable()->change();
             $table->tinyInteger('anggotaKeluarga')->nullable()->change();
-            $table->string('password')->nullable()->change();
+            $table->text('password')->nullable()->change();
         });
     }
 

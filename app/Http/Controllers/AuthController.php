@@ -15,6 +15,7 @@ use App\Mail\OtpMail;
 use App\Mail\RegisteredUserDataMail;
 use App\Mail\RegisteredSubAdminDataMail;
 use App\Models\RtRw;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AuthController extends Controller
 {

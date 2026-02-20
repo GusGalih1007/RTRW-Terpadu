@@ -118,16 +118,28 @@ class RegisteredUserDataMail extends Mailable
     {
         $attachments = [];
         
-        // Add QR code as attachment if it exists
+        // Add QR code as PDF attachment if it exists
         if ($this->user->qrImage) {
-            $filePath = storage_path('app/public/' . $this->user->qrImage);
-            
-            if (file_exists($filePath)) {
-                $fileName = 'QR_Code_' . $this->user->username . '.png';
+            try {
+                // Generate PDF using AuthService
+                $authService = app(\App\Services\AuthService::class);
+                $pdf = $authService->generateQrPdf($this->user->userId);
                 
-                $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromPath($filePath)
-                    ->as($fileName)
-                    ->withMime('image/png');
+                $fileName = 'QR_Code_' . $this->user->username . '.pdf';
+                
+                $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromData(fn() => $pdf->output(), $fileName)
+                    ->withMime('application/pdf');
+            } catch (Exception $e) {
+                // Fallback to PNG attachment if PDF generation fails
+                $filePath = storage_path('app/public/' . $this->user->qrImage);
+                
+                if (file_exists($filePath)) {
+                    $fileName = 'QR_Code_' . $this->user->username . '.png';
+                    
+                    $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromPath($filePath)
+                        ->as($fileName)
+                        ->withMime('image/png');
+                }
             }
         }
         

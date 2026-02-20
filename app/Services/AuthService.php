@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AuthService
 {
@@ -95,6 +96,35 @@ class AuthService
             ];
         } catch (Exception $e) {
             throw new Exception('Gagal membuat kode QR: ' . $e->getMessage());
+        }
+    }
+
+    public function generateQrPdf(string $userId)
+    {
+        try {
+            $user = $this->authRepository->getUserById($userId);
+            
+            if (!$user) {
+                throw new Exception('User tidak ditemukan');
+            }
+
+            if (!$user->qrImage) {
+                throw new Exception('User belum memiliki QR code');
+            }
+
+            // Generate QR code content
+            $qrContent = (string) $userId;
+            
+            // Create PDF using DomPDF
+            $pdf = PDF::loadView('auth.user-qr-image', [
+                'user' => $user,
+                'qrContent' => $qrContent
+            ])
+            ->setPaper('a5', 'portrait');
+
+            return $pdf;
+        } catch (Exception $e) {
+            throw new Exception('Gagal membuat PDF QR: ' . $e->getMessage());
         }
     }
 
