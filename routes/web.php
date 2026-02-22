@@ -5,7 +5,7 @@ use App\Http\Controllers\RtRwController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('landing');
 })->name('welcome');
 
 
@@ -40,6 +40,12 @@ Route::prefix('auth')->group(function () {
     // Login
     Route::get('login', [AuthController::class, 'loginPage'])->name('auth.login');
     Route::post('login', [AuthController::class, 'login'])->name('auth.login.post');
+
+    Route::get('forgot-password', [AuthController::class, 'forgotPasswordPage'])->name('auth.forgot-password');
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('auth.forgot-password.post');
+
+    Route::get('reset-password/user/{userId}', [AuthController::class, 'resetPasswordPage'])->name('auth.reset-password');
+    Route::put('reset-password/user/{userId}', [AuthController::class, 'resetPassword'])->name('auth.reset-password.put');
 
     // OTP
     Route::get('otp-verification', [AuthController::class, 'verifyOtpPage'])->name('auth.verify-otp');

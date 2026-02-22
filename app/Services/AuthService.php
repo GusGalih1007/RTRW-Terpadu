@@ -164,7 +164,8 @@ class AuthService
 
     public function login($user)
     {
-        try {
+        try 
+        {
 
             Auth::login($user);
 
@@ -182,7 +183,7 @@ class AuthService
     
             return (bool) $user->email_verified_at;
         } catch (Exception $e) {
-            throw new Exception('Gagal mengecek email verifikasi: ' . $e->getMessage());
+            throw new Exception('Gagal melakukan pengecekan validasi email: ' . $e->getMessage());
         }
     }
 
@@ -194,21 +195,6 @@ class AuthService
     public function getUserById(string $userId)
     {
         return $this->authRepository->getUserById($userId);
-    }
-
-    public function requestPasswordReset(string $email)
-    {
-        $user = $this->authRepository->getUserByEmail($email);
-
-        if (!$user) {
-            throw new Exception('Akun tidak ditemukan');
-        }
-
-        $otp = $this->authRepository->generateOtp($email, OtpType::ResetPassword->value);
-
-        Mail::to($email)->send(new OtpMail($otp, 'Reset Password'));
-
-        return true;
     }
 
     public function generateOtp(string $email, string $type)
@@ -231,11 +217,8 @@ class AuthService
         return $result;
     }
 
-    public function resetPassword(string $email, string $otp, string $password)
+    public function resetPassword(string $email, string $password)
     {
-        // Verify OTP first
-        $this->verifyOtp($email, $otp, OtpType::ResetPassword->value);
-
         // Update password
         $user = $this->authRepository->updatePasswordByEmail($email, $password);
 
