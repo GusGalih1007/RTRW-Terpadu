@@ -27,4 +27,10 @@ class RtRw extends Model
     {
         return $this->hasMany(Users::class, 'rtRwId', 'rtRwId');
     }
+
+    public function program()
+    {
+        return $this->hasMany(Program::class, 'rtRwId', 'rtRwId');
+    }
+
 }

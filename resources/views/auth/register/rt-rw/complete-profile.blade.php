@@ -968,7 +968,7 @@
 
                         // Add new option to main form select
                         const newOption = document.createElement('option');
-                        newOption.value = result.data.id;
+                        newOption.value = result.data.rtRwid;
                         newOption.textContent = result.data.nomor;
                         rtRwId.appendChild(newOption);
 
