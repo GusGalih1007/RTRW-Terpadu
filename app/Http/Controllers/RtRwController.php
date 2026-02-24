@@ -32,7 +32,7 @@ class RtRwController extends Controller
         $data = $this->rtrwRepository->getAll();
         $data = $this->wilayahService->mapWilayahCollection($data);
 
-        return view('admin.rt-rw', compact('data'));
+        return view('admin.rt-rw.index', compact('data'));
     }
 
     /**
@@ -41,9 +41,9 @@ class RtRwController extends Controller
     public function create()
     {
         $data = null;
-        $province = $this->wilayahService->getProvinces();
+        $provinces = $this->wilayahService->getProvinces();
 
-        return view('admin.rt-rw.form', compact('data', 'province'));
+        return view('admin.rt-rw.form', compact('data', 'provinces'));
     }
 
     /**

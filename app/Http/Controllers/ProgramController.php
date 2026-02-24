@@ -31,7 +31,7 @@ class ProgramController extends Controller
     {
         $data = $this->programRepository->getAll();
 
-        return view('subadmin.program', compact('data'));
+        return view('subadmin.program.index', compact('data'));
     }
 
     /**

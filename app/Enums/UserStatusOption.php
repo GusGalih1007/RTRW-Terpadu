@@ -2,7 +2,10 @@
 
 namespace App\Enums;
 
-enum UserStatusOption
+enum UserStatusOption: string
 {
-    //
+    case Pending = 'pending';
+    case Active = 'active';
+    case InActive = 'inactive';
+    case Rejected = 'rejected';
 }
