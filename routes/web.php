@@ -58,6 +58,20 @@ Route::prefix('auth')->group(function () {
 
 // list of sub-admin user route
 Route::prefix('sub-admin')->name('sub-admin')->group(function () {
+
+    // RT/RW
     Route::post('rt-rw', [RtRwController::class, 'store'])->name('.rt-rw.store');
-})->middleware(['web']);
+});
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    
+    // RT/RW
+    Route::get('rt-rw', [RtRwController::class, 'index'])->name('rt-rw');
+    Route::get('rt-rw/create', [RtRwController::class, 'create'])->name('rt-rw.create');
+    Route::post('rt-rw', [RtRwController::class, 'store'])->name('rt-rw.store');
+    Route::get('rt-rw/{rtrwId}', [RtRwController::class, 'show'])->name('rt-rw.show');
+    Route::get('rt-rw/{rtrwId}/edit', [RtRwController::class, 'edit'])->name('rt-rw.edit');
+    Route::put('rt-rw/{rtrwId}', [RtRwController::class, 'update'])->name(  'rt-rw.update');
+    Route::delete('rt-rw/{rtrwId}', [RtRwController::class, 'delete'])->name('rt-rw.delete');
+});
 

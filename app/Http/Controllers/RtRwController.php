@@ -29,7 +29,10 @@ class RtRwController extends Controller
      */
     public function index()
     {
-        //
+        $data = $this->rtrwRepository->getAll();
+        $data = $this->wilayahService->mapWilayahCollection($data);
+
+        return view('admin.rt-rw.index', compact('data'));
     }
 
     /**
@@ -37,7 +40,10 @@ class RtRwController extends Controller
      */
     public function create()
     {
-        //
+        $data = null;
+        $provinces = $this->wilayahService->getProvinces();
+
+        return view('admin.rt-rw.form', compact('data', 'provinces'));
     }
 
     /**
@@ -92,7 +98,81 @@ class RtRwController extends Controller
         } catch (Exception $e) {
             $this->loggingService->error('RtRwController', 'Terjadi kesalahan sistem.', $e, [
                 'request' => $request->all(),
-                'method' => 'store'
+                'method' => 'post'
+            ]);
+
+            return redirect()
+                ->route('admin.rt-rw')
+                ->with('error', 'Terjadi kesalahan sistem. Coba lagi nanti');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(RtRw $data)
+    {
+        $data = $this->wilayahService->mapWilayahCollection($data);
+
+        return view('admin.rt-rw.show', compact('data'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(RtRw $data)
+    {
+        $data = $this->wilayahService->mapWilayahCollection($data);
+        $province = $this->wilayahService->getProvinces();
+
+        return view('admin.rt-rw.form', compact('data', 'province'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, RtRw $data)
+    {
+        try {
+            $validate = Validator::make($request->All(), [
+                'rt' => ['required', 'numeric', 'max_digits:3'],
+                'rw' => ['required', 'numeric', 'max_digits:3'],
+                'kodeProvinsi'  => ['required'],
+                'kodeKabupaten' => ['required'],
+                'kodeKecamatan' => ['required'],
+                'kodeKelurahan' => ['required'],
+            ]);
+
+            if ($validate->fails()) {
+                $this->loggingService->error('RtRwController', 'Validasi form gagal', null, [
+                    'request' => $request->all(),
+                    'message' => $validate->errors()
+                ]);
+
+                return redirect()
+                    ->back()
+                    ->withErrors($validate->errors())
+                    ->withInput($request->all())
+                    ->with('error', 'Mohon lengkapi form yang diberikan');
+            }
+
+            $input = [
+                'nomor' => $request->rt . '/' . $request->rw,
+                'kodeProvinsi' =>  $request->kodeProvinsi,
+                'kodeKabupaten' => $request->kodeKabupaten,
+                'kodeKecamatan' => $request->kodeKecamatan,
+                'kodeKelurahan' => $request->kodeKelurahan,
+            ];
+
+            $data->update($input);
+
+            return redirect()
+                ->route('admin.rt-rw')
+                ->with('success', 'Data RT/RW telah Diubah!');
+        } catch (Exception $e) {
+            $this->loggingService->error('RtRwController', 'Terjadi kesalahan sistem.', $e, [
+                'request' => $request->all(),
+                'method' => 'put'
             ]);
 
             return redirect()->back()->with('error', 'Terjadi kesalahan sistem. Coba lagi nanti');
@@ -100,35 +180,15 @@ class RtRwController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(RtRw $rtRw)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(RtRw $rtRw)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, RtRw $rtRw)
-    {
-        //
-    }
-
-    /**
      * Remove the specified resource from storage.
      */
-    public function destroy(RtRw $rtRw)
+    public function destroy(RtRw $data)
     {
-        //
+        $data->delete();
+
+        return redirect()
+            ->route('admin.rt-rw')
+            ->with('Data RT/RW berhasil dihapus!');
     }
 
     public function apiGetByKelurahan(int $kelurahanId)
