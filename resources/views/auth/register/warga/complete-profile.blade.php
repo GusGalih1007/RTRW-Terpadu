@@ -342,7 +342,7 @@
                                     @foreach ($rtrws as $rtrw)
                                         <option value="{{ $rtrw->rtRwId }}"
                                             {{ old('rtRwId') == $rtrw->rtRwId ? 'selected' : '' }}>
-                                            {{ $rtrw->nomor }}
+                                            {{ $rtrw->rt . '/' . $rtrw->rw }}
                                         </option>
                                     @endforeach
                                 @else
@@ -623,7 +623,7 @@
                             data.forEach(rtrw => {
                                 const option = document.createElement('option');
                                 option.value = rtrw.rtRwId; // ← note: key is rtRwId, not id
-                                option.textContent = rtrw.nomor;
+                                option.textContent = rtrw.rt + '/' + rtrw.rw;
                                 rtRwId.appendChild(option);
                             });
                             rtRwId.disabled = false;

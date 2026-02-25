@@ -69,9 +69,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('rt-rw', [RtRwController::class, 'index'])->name('rt-rw');
     Route::get('rt-rw/create', [RtRwController::class, 'create'])->name('rt-rw.create');
     Route::post('rt-rw', [RtRwController::class, 'store'])->name('rt-rw.store');
-    Route::get('rt-rw/{rtrwId}', [RtRwController::class, 'show'])->name('rt-rw.show');
-    Route::get('rt-rw/{rtrwId}/edit', [RtRwController::class, 'edit'])->name('rt-rw.edit');
-    Route::put('rt-rw/{rtrwId}', [RtRwController::class, 'update'])->name(  'rt-rw.update');
-    Route::delete('rt-rw/{rtrwId}', [RtRwController::class, 'delete'])->name('rt-rw.delete');
+    Route::get('rt-rw/{id}/show', [RtRwController::class, 'show'])->name('rt-rw.show');
+    Route::get('rt-rw/{id}/edit', [RtRwController::class, 'edit'])->name('rt-rw.edit');
+    Route::put('rt-rw/{id}', [RtRwController::class, 'update'])->name(  'rt-rw.update');
+    Route::delete('rt-rw/{id}', [RtRwController::class, 'destroy'])->name('rt-rw.delete');
 });
 

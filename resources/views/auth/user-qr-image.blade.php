@@ -13,9 +13,14 @@
     $kelurahanName = collect($kelurahan)->firstWhere('id', $user->kodeKelurahan)['name'] ?? '';
 
     // Build alamat
+    $rtRwText = '';
+    if ($user->rtrw) {
+        $rtRwText = $user->rtrw->rt . '/' . $user->rtrw->rw;
+    }
+    
     $alamatParts = array_filter([
         $user->alamatDetail,
-        $user->rtrw ? $user->rtrw->nomor : '',
+        $rtRwText,
         $kelurahanName,
         $kecamatanName,
         $kabupatenName,
@@ -114,7 +119,7 @@
 
         <div class="info-section">
             <div class="status-badge">
-                {{ $user->role->roleName === 'User' ? 'Warga: ' : 'Ketua RT/RW: ' . $user->rtrw->nomor }}
+                {{ $user->role->roleName === 'User' ? 'Warga: ' : 'Ketua RT/RW: ' . ($user->rtrw ? $user->rtrw->rt . '/' . $user->rtrw->rw : '') }}
             </div>
 
             <div class="user-name">{{ $user->username }}</div>

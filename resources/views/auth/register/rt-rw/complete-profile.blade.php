@@ -506,7 +506,7 @@
                                     @foreach ($rtrws as $rtrw)
                                         <option value="{{ $rtrw->rtRwId }}"
                                             {{ old('rtRwId') == $rtrw->rtRwId ? 'selected' : '' }}>
-                                            {{ $rtrw->nomor }}
+                                            {{ $rtrw->rt . '/' . $rtrw->rw }}
                                         </option>
                                     @endforeach
                                 @else
@@ -865,7 +865,7 @@
                             data.forEach(rtrw => {
                                 const option = document.createElement('option');
                                 option.value = rtrw.rtRwId; // ← note: key is rtRwId, not id
-                                option.textContent = rtrw.nomor;
+                                option.textContent = rtrw.rt + '/' + rtrw.rw;
                                 rtRwId.appendChild(option);
                             });
                             rtRwId.disabled = false;
@@ -968,12 +968,12 @@
 
                         // Add new option to main form select
                         const newOption = document.createElement('option');
-                        newOption.value = result.data.rtRwid;
-                        newOption.textContent = result.data.nomor;
+                        newOption.value = result.data.rtRwId;
+                        newOption.textContent = result.data.rt + '/' + result.data.rw;
                         rtRwId.appendChild(newOption);
 
                         // Select the new option
-                        rtRwId.value = result.data.id;
+                        rtRwId.value = result.data.rtRwId;
 
                         // Close modal after success
                         setTimeout(() => {

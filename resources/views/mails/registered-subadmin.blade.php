@@ -211,7 +211,7 @@
             <div class="info-row">
                 <span class="info-label">Nomor RT/RW</span>
                 <span class="info-value">
-                    {{ $user->rtrw->nomor }}
+                    {{ $user->rtrw ? $user->rtrw->rt . '/' . $user->rtrw->rw : '' }}
                 </span>
             </div>
 

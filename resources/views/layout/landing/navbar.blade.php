@@ -2,17 +2,15 @@
     <div class="container-fluid navbar-inner">
         <div class="d-flex align-items-center justify-content-between w-100 landing-header">
             <a href="#" class="navbar-brand d-xl-flex d-none m-0">
-                <!--Logo start-->
-                <svg class="icon-30 text-primary" width="30" viewBox="0 0 30 30" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <rect x="-0.757324" y="19.2427" width="28" height="4" rx="2"
-                        transform="rotate(-45 -0.757324 19.2427)" fill="currentColor"></rect>
-                    <rect x="7.72803" y="27.728" width="28" height="4" rx="2"
-                        transform="rotate(-45 7.72803 27.728)" fill="currentColor"></rect>
-                    <rect x="10.5366" y="16.3945" width="16" height="4" rx="2"
-                        transform="rotate(45 10.5366 16.3945)" fill="currentColor"></rect>
-                    <rect x="10.5562" y="-0.556152" width="28" height="4" rx="2"
-                        transform="rotate(45 10.5562 -0.556152)" fill="currentColor"></rect>
+                <svg width="90" height="90" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="40" y="40" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="bold"
+                        fill="black" text-anchor="middle" dominant-baseline="middle">RT</text>
+                    <text x="45" y="63" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="bold"
+                        fill="black" text-anchor="middle" dominant-baseline="middle">RW</text>
+                    <line x1="20" y1="78" x2="80" y2="78" stroke="black"
+                        stroke-width="1.5" />
+                    <text x="48" y="88" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold"
+                        fill="#3B58E9" text-anchor="middle" dominant-baseline="middle">Terpadu</text>
                 </svg>
                 <!--logo End-->
                 <h5 class="logo-title">RT/RW Terpadu</h5>
@@ -28,22 +26,22 @@
 
                 <a href="#" class="navbar-brand d-xl-none ms-3">
                     <!--Logo start-->
-                    <svg class="icon-30 text-primary" width="30" viewBox="0 0 30 30" fill="none"
+                    <svg width="50" height="50" viewBox="0 0 120 120" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
-                        <rect x="-0.757324" y="19.2427" width="28" height="4" rx="2"
-                            transform="rotate(-45 -0.757324 19.2427)" fill="currentColor"></rect>
-                        <rect x="7.72803" y="27.728" width="28" height="4" rx="2"
-                            transform="rotate(-45 7.72803 27.728)" fill="currentColor"></rect>
-                        <rect x="10.5366" y="16.3945" width="16" height="4" rx="2"
-                            transform="rotate(45 10.5366 16.3945)" fill="currentColor"></rect>
-                        <rect x="10.5562" y="-0.556152" width="28" height="4" rx="2"
-                            transform="rotate(45 10.5562 -0.556152)" fill="currentColor"></rect>
+                        <text x="40" y="40" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="bold"
+                            fill="black" text-anchor="middle" dominant-baseline="middle">RT</text>
+                        <text x="45" y="63" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="bold"
+                            fill="black" text-anchor="middle" dominant-baseline="middle">RW</text>
+                        <line x1="20" y1="78" x2="80" y2="78" stroke="black"
+                            stroke-width="1.5" />
+                        <text x="48" y="88" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold"
+                            fill="#3B58E9" text-anchor="middle" dominant-baseline="middle">Terpadu</text>
                     </svg>
                     <!--logo End-->
                     <h5 class="logo-title">RT/RW Terpadu</h5>
                 </a>
             </div>
-            <ul class="d-block d-xl-none list-unstyled m-0">
+            {{-- <ul class="d-block d-xl-none list-unstyled m-0">
                 <li class="nav-item dropdown iq-responsive-menu">
                     <div class="btn btn-sm bg-body" id="navbarDropdown-search-11" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
@@ -74,7 +72,7 @@
                         </li>
                     </ul>
                 </li>
-            </ul>
+            </ul> --}}
 
             <!-- Horizontal Menu Start -->
             <nav id="navbar_main" class="mobile-offcanvas nav navbar navbar-expand-xl hover-nav horizontal-nav">
@@ -82,16 +80,19 @@
                     <div class="offcanvas-header px-0">
                         <a href="#" class="navbar-brand d-xl-none ms-3">
                             <!--Logo start-->
-                            <svg class="icon-30 text-primary" width="30" viewBox="0 0 30 30" fill="none"
+                            <svg width="50" height="50" viewBox="0 0 120 120" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
-                                <rect x="-0.757324" y="19.2427" width="28" height="4" rx="2"
-                                    transform="rotate(-45 -0.757324 19.2427)" fill="currentColor"></rect>
-                                <rect x="7.72803" y="27.728" width="28" height="4" rx="2"
-                                    transform="rotate(-45 7.72803 27.728)" fill="currentColor"></rect>
-                                <rect x="10.5366" y="16.3945" width="16" height="4" rx="2"
-                                    transform="rotate(45 10.5366 16.3945)" fill="currentColor"></rect>
-                                <rect x="10.5562" y="-0.556152" width="28" height="4" rx="2"
-                                    transform="rotate(45 10.5562 -0.556152)" fill="currentColor"></rect>
+                                <text x="40" y="40" font-family="Arial, Helvetica, sans-serif" font-size="32"
+                                    font-weight="bold" fill="black" text-anchor="middle"
+                                    dominant-baseline="middle">RT</text>
+                                <text x="45" y="63" font-family="Arial, Helvetica, sans-serif" font-size="32"
+                                    font-weight="bold" fill="black" text-anchor="middle"
+                                    dominant-baseline="middle">RW</text>
+                                <line x1="20" y1="78" x2="80" y2="78" stroke="black"
+                                    stroke-width="1.5" />
+                                <text x="48" y="88" font-family="Arial, Helvetica, sans-serif" font-size="14"
+                                    font-weight="bold" fill="#3B58E9" text-anchor="middle"
+                                    dominant-baseline="middle">Terpadu</text>
                             </svg>
                             <!--logo End-->
                             <h5 class="logo-title">RT/RW Terpadu</h5>

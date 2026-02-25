@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
 
 class RtRw extends Model
 {
@@ -15,7 +16,8 @@ class RtRw extends Model
     protected $primaryKey = 'rtRwId';
 
     protected $fillable = [
-        'nomor',
+        'rt',
+        'rw',
         'kodeProvinsi',
         'kodeKabupaten',
         'kodeKecamatan',

@@ -3,15 +3,21 @@
     <form method="POST" action="{{ $data ? route('admin.rt-rw.update', $data->rtRwId) : route('admin.rt-rw.store') }}"
         id="rtrwForm">
 
-        <label for="rt">RT</label><br>
-        <input type="number" name="rt" id="rt" required><br><br>
-        <label for="rw">RW</label><br>
-        <input type="number" name="rw" id="rw" required><br><br>
-        <label for="provinsi">Provinsi</label><br>
+        {{ csrf_field() }}
+
+        @if ($data)
+            @method('PUT')
+        @endif
+
+        <label for="rt">RT *</label><br>
+        <input type="number" name="rt" id="rt" value="{{ old('rt', $data->rt ?? '') }}" required><br><br>
+        <label for="rw">RW *</label><br>
+        <input type="number" name="rw" id="rw" value="{{ old('rw', $data->rw ?? '') }}" required><br><br>
+        <label for="kodeProvinsi">Provinsi *</label><br>
         <select id="kodeProvinsi" name="kodeProvinsi" required><br><br>
             <option value="">Pilih Provinsi</option>
             @foreach ($provinces as $province)
-                <option value="{{ $province['id'] }}" {{ old('kodeProvinsi') == $province['id'] ? 'selected' : '' }}>
+                <option value="{{ $province['id'] }}" {{ $data ? ($data->kodeProvinsi == $province['id'] ? 'selected' : '') : '' }}>
                     {{ $province['name'] }}
                 </option>
             @endforeach
@@ -43,6 +49,9 @@
         @error('kodeKelurahan')
             <div class="error-message" style="display: block;">{{ $message }}</div>
         @enderror
+
+        <label for="alamatDetail">Alamat Detail</label><br>
+        <textarea name="alamatDetail" id="alamatDetail" placeholder="Jl. Manggis No. 3...">{{ $data->alamatDetail ?? '' }}</textarea><br><br>
         
         <button type="submit" id="submitBtn">Simpan</button>
     </form>

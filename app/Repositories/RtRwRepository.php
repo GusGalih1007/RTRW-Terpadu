@@ -4,11 +4,11 @@ namespace App\Repositories;
 
 use App\Interfaces\RtRwRepositoryInterface;
 use App\Models\RtRw;
-use Exception;
 
 class RtRwRepository implements RtRwRepositoryInterface
 {
     protected $model;
+
     /**
      * Create a new class instance.
      */
@@ -43,6 +43,7 @@ class RtRwRepository implements RtRwRepositoryInterface
 
     public function delete(string $id)
     {
+        // dd($id);
         return $this->model->findOrFail($id)->delete();
     }
 
@@ -50,7 +51,7 @@ class RtRwRepository implements RtRwRepositoryInterface
     {
         $data = $this->model->findOrFail($id);
 
-        if (!$data) {
+        if (! $data) {
             return false;
         }
 

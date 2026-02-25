@@ -168,9 +168,12 @@ class WilayahService
 
     public function mapWilayahCollection($data)
     {
-        $provinceIds = $data->pluck('kodeProvinsi')->unique()->filter();
-        $regencyIds = $data->pluck('kodeKabupaten')->unique()->filter();
-        $districtIds = $data->pluck('kodeKecamatan')->unique()->filter();
+        // Ensure $data is always a collection
+        $collection = collect($data);
+        
+        $provinceIds = $collection->pluck('kodeProvinsi')->unique()->filter();
+        $regencyIds = $collection->pluck('kodeKabupaten')->unique()->filter();
+        $districtIds = $collection->pluck('kodeKecamatan')->unique()->filter();
 
         $provinces = collect($this->getProvinces());
 
@@ -189,7 +192,7 @@ class WilayahService
             $villages = $villages->merge($this->getVillages($districtId));
         }
 
-        return $data->map(function ($item) use ($provinces, $regencies, $districts, $villages) {
+        return $collection->map(function ($item) use ($provinces, $regencies, $districts, $villages) {
             $item->province_name = $provinces->firstWhere('id', $item->kodeProvinsi)['name'] ?? '-';
             $item->regency_name = $regencies->firstWhere('id', $item->kodeKabupaten)['name'] ?? '-';
             $item->district_name = $districts->firstWhere('id', $item->kodeKecamatan)['name'] ?? '-';

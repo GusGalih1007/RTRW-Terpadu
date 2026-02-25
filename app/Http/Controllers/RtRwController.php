@@ -59,6 +59,7 @@ class RtRwController extends Controller
                 'kodeKabupaten' => ['required'],
                 'kodeKecamatan' => ['required'],
                 'kodeKelurahan' => ['required'],
+                'alamatDetail'  => ['nullable', 'string']
             ]);
 
             if ($validate->fails()) {
@@ -75,11 +76,13 @@ class RtRwController extends Controller
             }
 
             $input = [
-                'nomor' => $request->rt . '/' . $request->rw,
+                'rt' => $request->rt,
+                'rw' => $request->rw,
                 'kodeProvinsi' =>  $request->kodeProvinsi,
                 'kodeKabupaten' => $request->kodeKabupaten,
                 'kodeKecamatan' => $request->kodeKecamatan,
                 'kodeKelurahan' => $request->kodeKelurahan,
+                'alamatDetail'  => $request->alamatDetail
             ];
 
             $newData = $this->rtrwRepository->store($input);
@@ -94,7 +97,7 @@ class RtRwController extends Controller
                 );
             }
 
-            return redirect()->route('')->with('success', 'Data RT/RW telah ditambahkan!');
+            return redirect()->route('admin.rt-rw')->with('success', 'Data RT/RW telah ditambahkan!');
         } catch (Exception $e) {
             $this->loggingService->error('RtRwController', 'Terjadi kesalahan sistem.', $e, [
                 'request' => $request->all(),
@@ -110,8 +113,9 @@ class RtRwController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(RtRw $data)
+    public function show($id)
     {
+        $data = $this->rtrwRepository->getById($id);
         $data = $this->wilayahService->mapWilayahCollection($data);
 
         return view('admin.rt-rw.show', compact('data'));
@@ -120,18 +124,19 @@ class RtRwController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(RtRw $data)
+    public function edit($id)
     {
-        $data = $this->wilayahService->mapWilayahCollection($data);
-        $province = $this->wilayahService->getProvinces();
+        $data = $this->rtrwRepository->getById($id);
+        // $data = $this->wilayahService->mapWilayahCollection($data);
+        $provinces = $this->wilayahService->getProvinces();
 
-        return view('admin.rt-rw.form', compact('data', 'province'));
+        return view('admin.rt-rw.form', compact('data', 'provinces'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, RtRw $data)
+    public function update(Request $request, $data)
     {
         try {
             $validate = Validator::make($request->All(), [
@@ -157,7 +162,8 @@ class RtRwController extends Controller
             }
 
             $input = [
-                'nomor' => $request->rt . '/' . $request->rw,
+                'rt' => $request->rt,
+                'rw' => $request->rw,
                 'kodeProvinsi' =>  $request->kodeProvinsi,
                 'kodeKabupaten' => $request->kodeKabupaten,
                 'kodeKecamatan' => $request->kodeKecamatan,
@@ -182,13 +188,14 @@ class RtRwController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(RtRw $data)
+    public function destroy($id)
     {
-        $data->delete();
+        $data = $this->rtrwRepository->getById($id);
+        $this->rtrwRepository->delete($data->rtRwId);
 
         return redirect()
             ->route('admin.rt-rw')
-            ->with('Data RT/RW berhasil dihapus!');
+            ->with('success', 'Data RT/RW berhasil dihapus!');
     }
 
     public function apiGetByKelurahan(int $kelurahanId)
@@ -197,10 +204,11 @@ class RtRwController extends Controller
             $rtrws = $this->rtrwRepository->getByKelurahan($kelurahanId);
 
             // Transform data to match frontend expectations
-            $transformedData = $rtrws->map(function ($rtrw) {
+            $transformedData = collect($rtrws)->map(function ($rtrw) {
                 return [
                     'rtRwId' => $rtrw->rtRwId,
-                    'nomor' => $rtrw->nomor,
+                    'rt' => $rtrw->rt,
+                    'rw' => $rtrw->rw,
                     'kodeKelurahan' => $rtrw->kodeKelurahan,
                     'created_at' => $rtrw->created_at,
                     'updated_at' => $rtrw->updated_at
