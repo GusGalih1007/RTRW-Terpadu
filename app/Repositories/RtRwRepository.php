@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Interfaces\RtRwRepositoryInterface;
 use App\Models\RtRw;
+use Illuminate\Support\Facades\Crypt;
 
 class RtRwRepository implements RtRwRepositoryInterface
 {
@@ -29,12 +30,16 @@ class RtRwRepository implements RtRwRepositoryInterface
 
     public function store(array $data)
     {
+        $data['password'] = Crypt::encrypt($data['password']);
+
         return $this->model->create($data);
     }
 
     public function update(string $id, array $data)
     {
         $model = $this->model->findOrFail($id);
+
+        $data['password'] = Crypt::encrypt($data['password']);
 
         $model->update($data);
 

@@ -93,7 +93,8 @@ class AuthController extends Controller
             ]);
 
             return redirect()
-                ->route('auth.verify-otp');
+                ->route('auth.verify-otp')
+                ->with('success', 'Email');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, [
                 'request' => $request->all(),
@@ -146,7 +147,7 @@ class AuthController extends Controller
             }
 
             $validate = Validator::make($request->all(), [
-                'nik' => ['required', 'integer', 'min_digits:16', 'max_digits:16'],
+                'nik' => ['required', 'numeric', 'min_digits:16', 'max_digits:16'],
                 'username' => ['required', 'string', 'min:2', 'max:80'],
                 'phone' => ['required', 'min_digits:10', 'max_digits:15'],
                 'kodeProvinsi' => ['required'],

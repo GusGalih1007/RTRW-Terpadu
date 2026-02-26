@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RtRwController;
+use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -75,3 +76,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::delete('rt-rw/{id}', [RtRwController::class, 'destroy'])->name('rt-rw.delete');
 });
 
+// Test User CRUD
+Route::prefix('user')->name('user')->group(function () {
+    Route::get('', [UsersController::class, 'index'])->name('');
+    Route::get('/create', [UsersController::class, 'create'])->name('.create');
+    Route::post('', [UsersController::class, 'store'])->name('.store');
+    Route::get('/{id}/profile', [UsersController::class, 'show'])->name('.profile');
+    Route::get('/{id}/edit', [UsersController::class, 'edit'])->name('.edit');
+    Route::put('/{id}', [UsersController::class, 'update'])->name('.update');
+    Route::delete('/{id}', [UsersController::class, 'destroy'])->name('.delete');
+});

@@ -58,7 +58,7 @@ class Users extends Authenticatable
     protected $casts = [
         'userId' => 'string',
         'roleId' => 'string',
-        'status' => UserStatusOption::cases(),
+        'status' => UserStatusOption::class,
         'roleverifiedAt' => 'datetime',
         'roleVerifiedBy' => 'string',
         'appointedAt' => 'datetime',

@@ -31,7 +31,7 @@ class RoleSeeder extends Seeder
         ]);
         Role::create([
             'roleName' => 'Staff',
-            'description' => 'Petugas pilihan RT/RW'
+            'description' => 'Petugas'
         ]);
     }
 }

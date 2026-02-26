@@ -4,7 +4,7 @@
             <div class="col-md-12">
                 <div class="d-flex justify-content-between align-items-center flex-wrap">
                     <div>
-                        <h1>Halo {{ Auth::user() }}!</h1>
+                        <h1>Halo {{ Auth::user()->username }}!</h1>
                         <p>Mari kita mulai pekerjaan kita!</p>
                     </div>
                 </div>

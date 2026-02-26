@@ -80,8 +80,8 @@
                         <img src="{{ asset('assets/images/avatars/avtar_3.png') }}" alt="User-Profile"
                             class="theme-color-pink-img img-fluid avatar avatar-50 avatar-rounded">
                         <div class="caption d-none d-md-block ms-3">
-                            <h6 class="caption-title mb-0">Austin Robertson</h6>
-                            <p class="caption-sub-title mb-0">Marketing Administrator</p>
+                            <h6 class="caption-title mb-0">{{ Auth::user()->username }}</h6>
+                            <p class="caption-sub-title mb-0">{{ Auth::user()->role->description }}</p>
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
