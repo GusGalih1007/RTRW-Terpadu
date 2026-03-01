@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en" dir="ltr" class="landing-pages" data-bs-theme-color="theme-color-default">
+<html lang="en" dir="ltr" data-bs-theme="light" data-bs-theme-color="theme-color-default">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>RT/RW Terpadu</title>
+    <title>RT/RW Terpadu | @yield('title')</title>
 
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
@@ -12,7 +12,7 @@
     <!-- Library / Plugin Css Build -->
     <link rel="stylesheet" href="{{ asset('assets/css/core/libs.min.css') }}">
 
-    <!-- RT/RW Terpadu Design System Css -->
+    <!-- Hope Ui Design System Css -->
     <link rel="stylesheet" href="{{ asset('assets/css/hope-ui.min.css?v=5.0.0') }}">
 
     <!-- Custom Css -->
@@ -24,13 +24,10 @@
     <!-- RTL Css -->
     <link rel="stylesheet" href="{{ asset('assets/css/rtl.min.css?v=5.0.0') }}">
 
-    <!-- SwiperSlider css -->
-    <link rel="stylesheet" href="{{ asset('assets/vendor/swiperSlider/swiper-bundle.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('landing-pages/assets/css/landing-pages.min.css') }}">
 </head>
 
-<body class="body-bg landing-pages">
-    <span class="screen-darken"></span>
+<body class="" data-bs-spy="scroll" data-bs-target="#elements-section" data-bs-offset="0" tabindex="0">
+    <!-- loader Start -->
     <div id="loading">
         <div class="loader simple-loader">
             <div class="loader-body">
@@ -38,20 +35,12 @@
         </div>
     </div>
     <!-- loader END -->
-    <main class="main-content">
-        <div class="position-relative">
-            @include('layout.landing.navbar')
-        </div>
-        @yield('content')
-    </main>
-    @include('layout.landing.footer')
-    <div id ="back-to-top" style="display: none;">
-        <a class="btn btn-primary btn-sm position-fixed top p-0" id="top" href="#top">
-            <svg class="icon-30" width="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 15.5L12 8.5L19 15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                    stroke-linejoin="round"></path>
-            </svg>
-        </a>
+    @include('layout.auth.offcanvas')
+
+    <div class="wrapper">
+        <section class="login-content">
+            @yield('main-content')
+        </section>
     </div>
     <!-- Library Bundle Script -->
     <script src="{{ asset('assets/js/core/libs.min.js') }}"></script>
@@ -83,9 +72,6 @@
     <!-- App Script -->
     <script src="{{ asset('assets/js/hope-ui.js') }}" defer></script>
 
-    <!-- SwiperSlider Script -->
-    <script src="{{ asset('assets/vendor/swiperSlider/swiper-bundle.min.js') }}"></script>
-    <script src="{{ asset('landing-pages/assets/js/custom.js') }}" defer></script>
 </body>
 
 </html>

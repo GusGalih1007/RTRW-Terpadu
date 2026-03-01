@@ -5,33 +5,35 @@
             <!--Logo start-->
             <div class="logo-main">
                 <div class="logo-normal">
-                    <svg class="icon-30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="-0.757324" y="19.2427" width="28" height="4" rx="2"
-                            transform="rotate(-45 -0.757324 19.2427)" fill="currentColor" />
-                        <rect x="7.72803" y="27.728" width="28" height="4" rx="2"
-                            transform="rotate(-45 7.72803 27.728)" fill="currentColor" />
-                        <rect x="10.5366" y="16.3945" width="16" height="4" rx="2"
-                            transform="rotate(45 10.5366 16.3945)" fill="currentColor" />
-                        <rect x="10.5562" y="-0.556152" width="28" height="4" rx="2"
-                            transform="rotate(45 10.5562 -0.556152)" fill="currentColor" />
+                    <svg width="50" height="50" viewBox="0 0 120 120" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <text x="40" y="40" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="bold"
+                            fill="black" text-anchor="middle" dominant-baseline="middle">RT</text>
+                        <text x="45" y="63" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="bold"
+                            fill="black" text-anchor="middle" dominant-baseline="middle">RW</text>
+                        <line x1="20" y1="78" x2="80" y2="78" stroke="black"
+                            stroke-width="1.5" />
+                        <text x="48" y="88" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold"
+                            fill="#3B58E9" text-anchor="middle" dominant-baseline="middle">Terpadu</text>
                     </svg>
                 </div>
                 <div class="logo-mini">
-                    <svg class="icon-30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="-0.757324" y="19.2427" width="28" height="4" rx="2"
-                            transform="rotate(-45 -0.757324 19.2427)" fill="currentColor" />
-                        <rect x="7.72803" y="27.728" width="28" height="4" rx="2"
-                            transform="rotate(-45 7.72803 27.728)" fill="currentColor" />
-                        <rect x="10.5366" y="16.3945" width="16" height="4" rx="2"
-                            transform="rotate(45 10.5366 16.3945)" fill="currentColor" />
-                        <rect x="10.5562" y="-0.556152" width="28" height="4" rx="2"
-                            transform="rotate(45 10.5562 -0.556152)" fill="currentColor" />
+                    <svg width="50" height="50" viewBox="0 0 120 120" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <text x="40" y="40" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="bold"
+                            fill="black" text-anchor="middle" dominant-baseline="middle">RT</text>
+                        <text x="45" y="63" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="bold"
+                            fill="black" text-anchor="middle" dominant-baseline="middle">RW</text>
+                        <line x1="20" y1="78" x2="80" y2="78" stroke="black"
+                            stroke-width="1.5" />
+                        <text x="48" y="88" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold"
+                            fill="#3B58E9" text-anchor="middle" dominant-baseline="middle">Terpadu</text>
                     </svg>
                 </div>
             </div>
             <!--logo End-->
 
-            <h4 class="logo-title">RT/RW Terpadu</h4>
+            <h4 class="logo-title">Navigasi</h4>
         </a>
         <div class="sidebar-toggle" data-toggle="sidebar" data-active="true">
             <i class="icon">

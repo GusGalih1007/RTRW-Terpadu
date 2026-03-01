@@ -1,4 +1,5 @@
-<center>
+@extends('layout.auth.app')
+@section('main-content')
     <h2>Register Sebagai Warga</h2>
     @if (session('error'))
         <div>
@@ -25,4 +26,4 @@
         <input type="password" name="password_confirmation"><br><br>
         <button type="submit">Submit</button>
     </form>
-</center>
+@endsection

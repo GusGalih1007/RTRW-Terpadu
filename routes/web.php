@@ -78,10 +78,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 // Test User CRUD
 Route::prefix('user')->name('user')->group(function () {
-    Route::get('', [UsersController::class, 'index'])->name('');
+    Route::get('', [UsersController::class, 'index'])->name('.index');
     Route::get('/create', [UsersController::class, 'create'])->name('.create');
     Route::post('', [UsersController::class, 'store'])->name('.store');
-    Route::get('/{id}/profile', [UsersController::class, 'show'])->name('.profile');
+    Route::get('/{id}/show', [UsersController::class, 'show'])->name('.show');
     Route::get('/{id}/edit', [UsersController::class, 'edit'])->name('.edit');
     Route::put('/{id}', [UsersController::class, 'update'])->name('.update');
     Route::delete('/{id}', [UsersController::class, 'destroy'])->name('.delete');

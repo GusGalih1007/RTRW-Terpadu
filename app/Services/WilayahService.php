@@ -171,6 +171,21 @@ class WilayahService
         // Ensure $data is always a collection
         $collection = collect($data);
         
+        // Handle case where collection might contain strings instead of objects
+        if ($collection->isEmpty()) {
+            return $collection;
+        }
+
+        // Check if the first item is a string (which would cause the error)
+        $firstItem = $collection->first();
+        if (is_string($firstItem)) {
+            Log::error('WilayahService: mapWilayahCollection received string data instead of objects', [
+                'first_item' => $firstItem,
+                'collection_type' => gettype($firstItem)
+            ]);
+            return $collection;
+        }
+        
         $provinceIds = $collection->pluck('kodeProvinsi')->unique()->filter();
         $regencyIds = $collection->pluck('kodeKabupaten')->unique()->filter();
         $districtIds = $collection->pluck('kodeKecamatan')->unique()->filter();
@@ -193,10 +208,59 @@ class WilayahService
         }
 
         return $collection->map(function ($item) use ($provinces, $regencies, $districts, $villages) {
-            $item->province_name = $provinces->firstWhere('id', $item->kodeProvinsi)['name'] ?? '-';
-            $item->regency_name = $regencies->firstWhere('id', $item->kodeKabupaten)['name'] ?? '-';
-            $item->district_name = $districts->firstWhere('id', $item->kodeKecamatan)['name'] ?? '-';
-            $item->village_name = $villages->firstWhere('id', $item->kodeKelurahan)['name'] ?? '-';
+            // Ensure $item is an object before accessing properties
+            if (!is_object($item) && !is_array($item)) {
+                Log::warning('WilayahService: Skipping non-object item in mapWilayahCollection', [
+                    'item_type' => gettype($item),
+                    'item_value' => $item
+                ]);
+                return $item;
+            }
+
+            // Get province name
+            $provinceName = '-';
+            if (isset($item->kodeProvinsi) || isset($item['kodeProvinsi'])) {
+                $provinceId = $item->kodeProvinsi ?? $item['kodeProvinsi'];
+                $province = $provinces->firstWhere('id', $provinceId);
+                $provinceName = $province ? $province['name'] : '-';
+            }
+
+            // Get regency name
+            $regencyName = '-';
+            if (isset($item->kodeKabupaten) || isset($item['kodeKabupaten'])) {
+                $regencyId = $item->kodeKabupaten ?? $item['kodeKabupaten'];
+                $regency = $regencies->firstWhere('id', $regencyId);
+                $regencyName = $regency ? $regency['name'] : '-';
+            }
+
+            // Get district name
+            $districtName = '-';
+            if (isset($item->kodeKecamatan) || isset($item['kodeKecamatan'])) {
+                $districtId = $item->kodeKecamatan ?? $item['kodeKecamatan'];
+                $district = $districts->firstWhere('id', $districtId);
+                $districtName = $district ? $district['name'] : '-';
+            }
+
+            // Get village name
+            $villageName = '-';
+            if (isset($item->kodeKelurahan) || isset($item['kodeKelurahan'])) {
+                $villageId = $item->kodeKelurahan ?? $item['kodeKelurahan'];
+                $village = $villages->firstWhere('id', $villageId);
+                $villageName = $village ? $village['name'] : '-';
+            }
+
+            // Add the new properties to the item
+            if (is_object($item)) {
+                $item->province_name = $provinceName;
+                $item->regency_name = $regencyName;
+                $item->district_name = $districtName;
+                $item->village_name = $villageName;
+            } elseif (is_array($item)) {
+                $item['province_name'] = $provinceName;
+                $item['regency_name'] = $regencyName;
+                $item['district_name'] = $districtName;
+                $item['village_name'] = $villageName;
+            }
 
             return $item;
         });

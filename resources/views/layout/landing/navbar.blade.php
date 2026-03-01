@@ -99,38 +99,66 @@
                         </a>
                         <button class="btn-close float-end px-3"></button>
                     </div>
-                    <ul class="navbar-nav iq-nav-menu list-unstyled" id="header-menu">
-                        <li class="nav-item">
-                            <a class="nav-link menu-arrow justify-content-start" data-bs-toggle="collapse"
-                                href="#homeData" role="button" aria-expanded="false" aria-controls="homeData">
-                                <span class="item-name">Home</span>
-                                <svg fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-18"
-                                    width="18" height="18" viewBox="0 0 24 24">
-                                    <path d="M19 8.5L12 15.5L5 8.5" stroke="currentColor" stroke-width="1.5"
-                                        stroke-linecap="round" stroke-linejoin="round"></path>
-                                </svg>
-                            </a>
-                            <ul class="iq-header-sub-menu list-unstyled collapse" id="homeData">
-                                <li class="nav-item"><a class="nav-link active" href="#">App Landing Page</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="../landing-pages/software-landing-page.html">
-                                        Software Landing Page
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" href="../landing-pages/about.html">About Us </a>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" href="../landing-pages/feature.html"> Features </a>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" href="../landing-pages/pricing.html">Pricing</a>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" href="../landing-pages/blog.html">Blog</a></li>
-                        <li class="nav-item"><a class="nav-link" href="../landing-pages/faq.html">Faq</a></li>
-                        <li class="nav-item"><a class="nav-link" href="../landing-pages/contact-us.html">Contact
-                                Us</a></li>
-                    </ul>
+                    @auth
+                        <ul class="navbar-nav iq-nav-menu list-unstyled" id="header-menu">
+                            <li class="nav-item">
+                                <a class="nav-link menu-arrow justify-content-start" data-bs-toggle="collapse"
+                                    href="#homeData" role="button" aria-expanded="false" aria-controls="homeData">
+                                    <span class="item-name">Home</span>
+                                    <svg fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-18"
+                                        width="18" height="18" viewBox="0 0 24 24">
+                                        <path d="M19 8.5L12 15.5L5 8.5" stroke="currentColor" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </a>
+                                <ul class="iq-header-sub-menu list-unstyled collapse" id="homeData">
+                                    <li class="nav-item"><a class="nav-link active" href="#">App Landing Page</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="../landing-pages/software-landing-page.html">
+                                            Software Landing Page
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="../landing-pages/about.html">About Us </a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="../landing-pages/feature.html"> Features </a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="../landing-pages/pricing.html">Pricing</a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="../landing-pages/blog.html">Blog</a></li>
+                            <li class="nav-item"><a class="nav-link" href="../landing-pages/faq.html">Faq</a></li>
+                            <li class="nav-item"><a class="nav-link" href="../landing-pages/contact-us.html">Contact
+                                    Us</a></li>
+                        </ul>
+                    @else
+                        <ul class="navbar-nav iq-nav-menu list-unstyled" id="header-menu">
+                            <li class="nav-item"><a class="nav-link" href="{{ route('auth.login') }}">Login</a></li>
+                            <li class="nav-item">
+                                <a class="nav-link menu-arrow justify-content-start"
+                                    data-bs-toggle="collapse" href="#registerData" role="button" aria-expanded="false"
+                                    aria-controls="registerData">
+                                    <span class="item-name text-primary">Register</span>
+                                    <svg fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-18"
+                                        width="18" height="18" viewBox="0 0 24 24">
+                                        <path d="M19 8.5L12 15.5L5 8.5" stroke="blue" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </a>
+                                <ul class="iq-header-sub-menu list-unstyled collapse" id="registerData">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ route('auth.register.warga') }}">Warga</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ route('auth.register.rt-rw') }}">
+                                            Ketua RT/RW
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    @endauth
                 </div> <!-- container-fluid.// -->
             </nav>
             <!-- Sidebar Menu End -->

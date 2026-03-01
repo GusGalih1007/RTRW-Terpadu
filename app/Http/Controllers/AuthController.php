@@ -260,7 +260,7 @@ class AuthController extends Controller
     {
         try {
             $validate = Validator::make($request->all(), [
-                'email' => ['required', 'email', 'exists:users,email'],
+                'email' => ['required', 'email'],
                 'password' => ['required', 'min:8'],
             ]);
 
@@ -408,6 +408,70 @@ class AuthController extends Controller
                         $user = $this->authService->getUserById($userId);
 
                         $this->authService->verifyOtp($user->email, $request->otp, $type);
+
+                        // Check if this is from UsersController (has userData in session)
+                        $userData = session('userData');
+                        if ($userData) {
+                            // Complete the user profile with stored data
+                            $this->authService->editProfile($userId, $userData);
+
+                            // Generate QR code for new user
+                            try {
+                                $qrResult = $this->authService->generateQrImage($userId);
+
+                                $this->loggingService->info('AuthController', 'QR code berhasil dibuat untuk user baru dari UsersController', [
+                                    'email' => $user->email,
+                                    'qr_path' => $qrResult['qr_path'],
+                                ]);
+
+                                // Refresh user object to include the qrImage field
+                                $user = $this->authService->getUserById($userId);
+                            } catch (Exception $qrException) {
+                                $this->loggingService->warning('AuthController', 'Gagal membuat QR code untuk user baru dari UsersController', [
+                                    'email' => $user->email,
+                                    'error' => $qrException->getMessage(),
+                                ]);
+                            }
+
+                            // Send email with user data and QR code
+                            switch ($user->roleId) {
+                                case UserRoleOption::SubAdmin->getUuid():
+                                    try {
+                                        Mail::to($user->email)->send(new RegisteredSubAdminDataMail($user));
+
+                                        $this->loggingService->info('AuthController', 'Email data pendaftaran berhasil dikirim untuk user dari UsersController', [
+                                            'email' => $user->email,
+                                        ]);
+                                    } catch (Exception $emailException) {
+                                        $this->loggingService->warning('AuthController', 'Gagal mengirim email data pendaftaran untuk user dari UsersController', [
+                                            'email' => $user->email,
+                                            'error' => $emailException->getMessage(),
+                                        ]);
+                                    }
+                                    break;
+                                case UserRoleOption::User->getUuid():
+                                    try {
+                                        Mail::to($user->email)->send(new RegisteredUserDataMail($user));
+
+                                        $this->loggingService->info('AuthController', 'Email data pendaftaran berhasil dikirim untuk user dari UsersController', [
+                                            'email' => $user->email,
+                                        ]);
+                                    } catch (Exception $emailException) {
+                                        $this->loggingService->warning('AuthController', 'Gagal mengirim email data pendaftaran untuk user dari UsersController', [
+                                            'email' => $user->email,
+                                            'error' => $emailException->getMessage(),
+                                        ]);
+                                    }
+                                    break;
+                            }
+
+                            // Clear session data
+                            session()->forget(['userData']);
+
+                            return redirect()
+                                ->route('user.index')
+                                ->with('success', 'Verifikasi email berhasil. Data pengguna telah dikirim ke email Anda');
+                        }
 
                         return match ($user->roleId) {
                             UserRoleOption::SubAdmin->getUuid() => redirect()->route('auth.complete-profile.rt-rw', $userId)->with('success', 'Silakan untuk mengisi data lengkap anda'),
