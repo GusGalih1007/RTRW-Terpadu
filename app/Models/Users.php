@@ -84,6 +84,11 @@ class Users extends Authenticatable
         return $this->belongsTo(RtRw::class, 'rtRwId', 'rtRwId');
     }
 
+    public function createdby()
+    {
+        return $this->belongsTo(Users::class, 'createdBy', 'userId');
+    }
+
     // Relation has many
     public function program()
     {

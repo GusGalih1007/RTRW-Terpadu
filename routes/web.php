@@ -57,32 +57,40 @@ Route::prefix('auth')->group(function () {
     Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout');
 });
 
-// list of sub-admin user route
-Route::prefix('sub-admin')->name('sub-admin')->group(function () {
+Route::middleware('check-authentication')->group(function () {
 
-    // RT/RW
-    Route::post('rt-rw', [RtRwController::class, 'store'])->name('.rt-rw.store');
-});
-
-Route::prefix('admin')->name('admin.')->group(function () {
+    // sub-admin list route
+    Route::prefix('sub-admin')->name('sub-admin')->group(function () {
     
-    // RT/RW
-    Route::get('rt-rw', [RtRwController::class, 'index'])->name('rt-rw');
-    Route::get('rt-rw/create', [RtRwController::class, 'create'])->name('rt-rw.create');
-    Route::post('rt-rw', [RtRwController::class, 'store'])->name('rt-rw.store');
-    Route::get('rt-rw/{id}/show', [RtRwController::class, 'show'])->name('rt-rw.show');
-    Route::get('rt-rw/{id}/edit', [RtRwController::class, 'edit'])->name('rt-rw.edit');
-    Route::put('rt-rw/{id}', [RtRwController::class, 'update'])->name(  'rt-rw.update');
-    Route::delete('rt-rw/{id}', [RtRwController::class, 'destroy'])->name('rt-rw.delete');
-});
-
-// Test User CRUD
-Route::prefix('user')->name('user')->group(function () {
-    Route::get('', [UsersController::class, 'index'])->name('.index');
-    Route::get('/create', [UsersController::class, 'create'])->name('.create');
-    Route::post('', [UsersController::class, 'store'])->name('.store');
-    Route::get('/{id}/show', [UsersController::class, 'show'])->name('.show');
-    Route::get('/{id}/edit', [UsersController::class, 'edit'])->name('.edit');
-    Route::put('/{id}', [UsersController::class, 'update'])->name('.update');
-    Route::delete('/{id}', [UsersController::class, 'destroy'])->name('.delete');
+        // RT/RW
+        Route::post('rt-rw', [RtRwController::class, 'store'])->name('.rt-rw.store');
+    });
+    
+    // admin route list
+    Route::prefix('admin')->name('admin.')->group(function () {
+        
+        // RT/RW
+        Route::get('rt-rw', [RtRwController::class, 'index'])->name('rt-rw');
+        Route::get('rt-rw/create', [RtRwController::class, 'create'])->name('rt-rw.create');
+        Route::post('rt-rw', [RtRwController::class, 'store'])->name('rt-rw.store');
+        Route::get('rt-rw/{id}/show', [RtRwController::class, 'show'])->name('rt-rw.show');
+        Route::get('rt-rw/{id}/edit', [RtRwController::class, 'edit'])->name('rt-rw.edit');
+        Route::put('rt-rw/{id}', [RtRwController::class, 'update'])->name(  'rt-rw.update');
+        Route::delete('rt-rw/{id}', [RtRwController::class, 'destroy'])->name('rt-rw.delete');
+    });
+    
+    // Test User CRUD
+    Route::prefix('user')->name('user')->group(function () {
+        Route::get('', [UsersController::class, 'index'])->name('.index');
+        Route::get('/create', [UsersController::class, 'create'])->name('.create');
+        Route::post('', [UsersController::class, 'store'])->name('.store');
+        Route::get('/{id}/show', [UsersController::class, 'show'])->name('.show');
+        Route::get('/{id}/otp-verification', [UsersController::class, 'otpVerificationPage'])->name('.otp-verification');
+        Route::post('/{id}/otp-verification', [UsersController::class, 'otpVerification'])->name('.otp-verification.post');
+        Route::get('/{id}/edit', [UsersController::class, 'edit'])->name('.edit');
+        Route::get('/{id}/status-update/{status}', [UsersController::class, 'statusUpdate'])->name('.status-change');
+        Route::get('/{id}/role-approval/{role}', [UsersController::class, 'roleApprove'])->name('.role-change');
+        Route::put('/{id}', [UsersController::class, 'update'])->name('.update');
+        Route::delete('/{id}', [UsersController::class, 'destroy'])->name('.delete');
+    });
 });

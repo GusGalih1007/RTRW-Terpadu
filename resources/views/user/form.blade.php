@@ -115,7 +115,7 @@
                                     </select>
                                 </div>
                             @endif
-                            <div class="form-group {{ Auth::user()->role->roleName == 'Sub-Admin' ? 'col-md-9 col-sm-12' : ''}}">
+                            <div class="form-group {{ Auth::user()->role->roleName != 'Sub-Admin' ? 'col-md-9 col-sm-12' : ''}}">
                                 <label for="alamatDetail" class="form-label">Alamat Rumah<span
                                         class="text-danger">*</span></label>
                                 <textarea name="alamatDetail" class="form-control" id="alamatDetail" placeholder="Jalan, Nomor rumah, dll..."></textarea>

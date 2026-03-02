@@ -210,7 +210,7 @@
             </div>
         </div>
 
-        @if ($user->qrImage)
+        {{-- @if ($user->qrImage)
             <div class="qr-section">
                 <h3>Kode QR Anda</h3>
                 <p>Gunakan kode QR ini untuk proses verifikasi dan identifikasi Anda di sistem RT/RW Terpadu</p>
@@ -222,7 +222,7 @@
                 <p><em>Simpan kode QR ini dengan baik dan jangan bagikan kepada siapa pun</em></p>
                 <p><em>QR code juga dilampirkan dalam email ini sebagai file terpisah untuk kemudahan download dan pencetakan</em></p>
             </div>
-        @endif
+        @endif --}}
 
         <div class="footer">
             <p><strong>Catatan Penting:</strong></p>

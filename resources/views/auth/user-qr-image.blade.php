@@ -45,6 +45,11 @@
             align-items: center;
             min-height: 100vh;
             background-color: #f5f5f5;
+            background-image: url('{{ asset('assets/images/auth/01.png') }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
         }
 
         .qr-card {
@@ -119,7 +124,7 @@
 
         <div class="info-section">
             <div class="status-badge">
-                {{ $user->role->roleName === 'User' ? 'Warga: ' : 'Ketua RT/RW: ' . ($user->rtrw ? $user->rtrw->rt . '/' . $user->rtrw->rw : '') }}
+                {{ $user->role->roleName === 'User' ? 'Warga: ' : 'Ketua RT/RW: ' . ($user->rtRwId ? $user->rtrw->rt . '/' . $user->rtrw->rw : '') }}
             </div>
 
             <div class="user-name">{{ $user->username }}</div>

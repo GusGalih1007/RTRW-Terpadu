@@ -11,6 +11,7 @@
                     <div class="card card-transparent auth-card d-flex justify-content-center mb-0 shadow-none">
                         <div class="card-body">
                             <a href="#" class="navbar-brand d-flex align-items-center mb-3">
+
                                 <!--Logo start-->
                                 <div class="logo-main">
                                     <div class="logo-normal">
@@ -90,13 +91,13 @@
                             @endif
                             <h2 class="mb-2 text-center">Verifikasi OTP</h2>
                             <p class="text-center">Masukan kode OTP yang telah kami kirimkan</p>
-                            <form action="{{ route('auth.verify-otp.post') }}" method="POST">
+                            <form action="{{ route('user.otp-verification.post', session('userId')) }}" method="POST">
                                 {{ csrf_field() }}
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div class="form-group">
                                             <label for="otp" class="form-label">Kode OTP</label>
-                                            <input type="number" name="otp" class="form-control" placeholder="Kode OTP..." id="otp">
+                                            <input type="number" name="otp" class="form-control" id="otp">
                                         </div>
                                     </div>
                                     <div class="d-flex justify-content-center">

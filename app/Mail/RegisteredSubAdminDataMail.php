@@ -86,6 +86,7 @@ class RegisteredSubAdminDataMail extends Mailable
                     ->view('mails.registered-subadmin')
                     ->with([
                         'user' => $this->user,
+                        'wilayahData' => $this->wilayahData,
                     ]);
     }
 
@@ -129,7 +130,7 @@ class RegisteredSubAdminDataMail extends Mailable
                 
                 $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromData(fn() => $pdf->output(), $fileName)
                     ->withMime('application/pdf');
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 // Fallback to PNG attachment if PDF generation fails
                 $filePath = storage_path('app/public/' . $this->user->qrImage);
                 

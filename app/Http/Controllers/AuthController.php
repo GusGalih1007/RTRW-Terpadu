@@ -15,6 +15,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AuthController extends Controller
 {
@@ -78,6 +79,11 @@ class AuthController extends Controller
                     return redirect()
                         ->route('auth.verify-otp')
                         ->with('success', 'Silakan verifikasi akun yang telah kamu buat');
+                } elseif ($existingEmail->nik == null) {
+                    return match ($existingEmail->roleId) {
+                        UserRoleOption::SubAdmin->getUuid() => redirect()->route('auth.complete-profile.rt-rw', $existingEmail->userId)->with('success', 'Silakan untuk mengisi data lengkap anda'),
+                        UserRoleOption::User->getUuid() => redirect()->route('auth.complete-profile.warga', $existingEmail->userId)->with('success', 'Silakan untuk mengisi data lengkap anda'),
+                    };
                 }
 
                 return redirect()
@@ -94,7 +100,7 @@ class AuthController extends Controller
 
             return redirect()
                 ->route('auth.verify-otp')
-                ->with('success', 'Email');
+                ->with('success', 'Kode OTP telah dikirim. Silahkan cek email anda');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, [
                 'request' => $request->all(),
@@ -238,7 +244,7 @@ class AuthController extends Controller
 
             $this->authService->login($user);
 
-            return redirect()->route('welcome')->with('success', 'Login berhasil. Selamat datang, '.$user->username);
+            return redirect()->route('welcome')->with('success', 'Register berhasil. Selamat datang, ' . $user->username);
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', 'Terjadi Kesalahan Dalam sistem', $e, [
                 'request' => $request->all(),
@@ -278,11 +284,11 @@ class AuthController extends Controller
 
             $user = $this->authService->getUserByEmail($request->email);
 
-            if (! $user) {
+            if (!$user) {
                 return redirect()->back()->with('error', 'Akun dengan email ini tidak ditemukan');
             }
 
-            if (! $this->authService->checkEmailVerified($user->email)) {
+            if (!$this->authService->checkEmailVerified($user->email)) {
                 $this->authService->resendOtp($user->email, OtpType::Register->value);
 
                 session([
@@ -304,7 +310,7 @@ class AuthController extends Controller
 
             return redirect()
                 ->route('auth.verify-otp')
-                ->with('success', 'login');
+                ->with('success', 'Kode OTP telah dikirim. Silahkan cek email anda');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, [
                 'request' => $request->all(),
@@ -343,7 +349,9 @@ class AuthController extends Controller
                     ->with('error', 'Akun dengan alamat email tersebut tidak ditemukan. Silahkan lakukan registrasi');
             }
 
-            $this->authService->generateOtp($user->email, OtpType::ResetPassword->value);
+            $otp = $this->authService->generateOtp($user->email, OtpType::ResetPassword->value);
+
+            Mail::to($user->email)->send(new OtpMail($otp, "Reset Password"));
 
             session([
                 'userId' => $user->userId,
@@ -352,7 +360,7 @@ class AuthController extends Controller
 
             return redirect()
                 ->route('auth.verify-otp')
-                ->with('success', 'reset passsword');
+                ->with('success', 'Verifikasi Berhasil. Silakan ubah password anda');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', $e->getMessage(), $e, [
                 'request' => $request->all(),
@@ -365,7 +373,7 @@ class AuthController extends Controller
         }
     }
 
-    public function resetPasswordPage($userId) 
+    public function resetPasswordPage($userId)
     {
         $user = $this->authService->getUserById($userId);
 
@@ -378,9 +386,53 @@ class AuthController extends Controller
         return view('auth.reset-password', compact('user'));
     }
 
-    public function resetPassword(Request $request, $userId) 
+    public function resetPassword(Request $request, $userId)
     {
-        
+        try {
+            $validate = Validator::make($request->all(), [
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
+            ]);
+
+            if ($validate->fails()) {
+                $this->loggingService->error('AuthController', 'Gagal Validasi', null, [
+                    'request' => $request->all(),
+                ]);
+
+                return redirect()
+                    ->back()
+                    ->withErrors($validate->errors())
+                    ->withInput($request->all())
+                    ->with('error', 'Mohon lengkapi form yang diberikan');
+            }
+
+            $user = $this->authService->getUserById($userId);
+
+            if (!$user) {
+                return redirect()
+                    ->back()
+                    ->with('error', 'Akun tidak ditemukan.');
+            }
+
+            // Reset password
+            $this->authService->resetPassword($user->email, $request->password);
+
+            // Clear session data
+            session()->forget(['userId', 'type']);
+
+            return redirect()
+                ->route('auth.login')
+                ->with('success', 'Password berhasil direset. Silakan login dengan password baru Anda.');
+        } catch (Exception $e) {
+            $this->loggingService->error('AuthController', $e->getMessage(), $e, [
+                'request' => $request->all(),
+                'user_id' => $userId,
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti')
+                ->withInput($request->all());
+        }
     }
 
     public function verifyOtpPage()
@@ -486,7 +538,7 @@ class AuthController extends Controller
 
                         return redirect()
                             ->route('welcome')
-                            ->with('success', 'Login berhasil. Selamat datang, '.$user->username);
+                            ->with('success', 'Login berhasil. Selamat datang, ' . $user->username);
                     case OtpType::ResetPassword->value:
                         $user = $this->authService->getUserById($userId);
 
@@ -523,7 +575,7 @@ class AuthController extends Controller
             $type = session('type');
             $userId = session('userId');
 
-            if (! $type || ! $userId) {
+            if (!$type || !$userId) {
                 $this->loggingService->error('AuthController', 'Session tidak valid. Silakan ulangi proses');
 
                 return redirect()->back()->with('error', 'Session tidak valid. Silakan ulangi proses');
@@ -552,7 +604,7 @@ class AuthController extends Controller
             $this->authService->logout();
 
             return redirect()
-                ->route('auth.login')
+                ->route('welcome')
                 ->with('success', 'Berhasil logout');
         } catch (Exception $e) {
             $this->loggingService->error('AuthController', 'Logout failed', $e, []);

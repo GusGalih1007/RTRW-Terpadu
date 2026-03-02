@@ -46,6 +46,10 @@ class AuthRepository implements AuthRepositoryInterface
                 throw new Exception('Akun tidak ditemukan');
             }
 
+            if ($data['password']) {
+                $data['password'] = Crypt::encrypt($data['password']);
+            }
+
             $user->update($data);
             return $user->fresh();
         } catch (Exception $e) {
@@ -94,7 +98,7 @@ class AuthRepository implements AuthRepositoryInterface
             }
     
             $user->update([
-                'password' => Hash::make($newPassword)
+                'password' => Crypt::encrypt($newPassword)
             ]);
     
             return $user;
@@ -110,7 +114,7 @@ class AuthRepository implements AuthRepositoryInterface
 
         if ($user) {
             $user->update([
-                'password' => Hash::make($newPassword)
+                'password' => Crypt::encrypt($newPassword)
             ]);
             return $user;
         }

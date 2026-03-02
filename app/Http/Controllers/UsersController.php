@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\UserRoleOption;
 use App\Enums\UserStatusOption;
 use App\Enums\OtpType;
+use App\Mail\OtpMail;
 use App\Mail\RegisteredUserDataMail;
 use App\Mail\RegisteredSubAdminDataMail;
 use App\Repositories\UserRepository;
@@ -14,6 +15,7 @@ use App\Services\WilayahService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 use function Symfony\Component\Clock\now;
@@ -84,12 +86,12 @@ class UsersController extends Controller
                 'status' => ['required'],
                 'pekerjaan' => ['required', 'string', 'max:100'],
                 'anggotaKeluarga' => ['required', 'numeric'],
-                'password' => ['required', 'string', 'confirmed', 'min:8'],
+                'password' => ['nullable', 'string', 'confirmed', 'min:8'],
                 'rtrw' => ['nullable'],
             ]);
 
             if ($validate->fails()) {
-                $this->loggingService->error('UserController', 'Gagal Validasi: '.$validate->errors(), null, [
+                $this->loggingService->error('UserController', 'Gagal Validasi: ' . $validate->errors(), null, [
                     'request' => $request->all(),
                 ]);
 
@@ -195,15 +197,16 @@ class UsersController extends Controller
             // Generate OTP for email verification
             $otp = $this->authService->generateOtp($user->email, OtpType::Register->value);
 
+            Mail::to($user->email)->send(new OtpMail($otp, 'Verifikasi Email'));
+
             // Store user ID and OTP type in session for verification
             session([
                 'userId' => $user->userId,
-                'type' => OtpType::Register->value,
-                'userData' => $input, // Store user data for completion after OTP verification
+                'type' => OtpType::Register->value
             ]);
 
             return redirect()
-                ->route('auth.verify-otp')
+                ->route('user.otp-verification', $user->userId)
                 ->with('success', 'Silakan verifikasi email Anda terlebih dahulu');
         } catch (Exception $e) {
             $this->loggingService->error('UserController', $e->getMessage(), $e, [
@@ -214,6 +217,110 @@ class UsersController extends Controller
                 ->back()
                 ->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti')
                 ->withInput($request->except('password'));
+        }
+    }
+
+    public function otpVerificationPage()
+    {
+        return view('user.otp-verification');
+    }
+
+    public function otpVerification(Request $request)
+    {
+        try {
+            $validate = Validator::make($request->all(), [
+                'otp' => ['required', 'numeric'],
+            ]);
+
+            if ($validate->fails()) {
+                throw new Exception('Data OTP tidak valid');
+            }
+
+            $type = session('type');
+            $userId = session('userId');
+
+            if ($type && $userId) {
+                switch ($type) {
+                    case OtpType::Register->value:
+                        $user = $this->authService->getUserById($userId);
+
+                        $this->authService->verifyOtp($user->email, $request->otp, $type);
+
+                        // Generate QR code for new user
+                        try {
+                            $qrResult = $this->authService->generateQrImage($userId);
+
+                            $this->loggingService->info('UsersController', 'QR code berhasil dibuat untuk user baru dari UsersController', [
+                                'email' => $user->email,
+                                'qr_path' => $qrResult['qr_path'],
+                            ]);
+
+                            // Refresh user object to include the qrImage field
+                            $user = $this->authService->getUserById($userId);
+                        } catch (Exception $qrException) {
+                            $this->loggingService->warning('UsersController', 'Gagal membuat QR code untuk user baru dari UsersController', [
+                                'email' => $user->email,
+                                'error' => $qrException->getMessage(),
+                            ]);
+                        }
+
+                        // Send email with user data and QR code
+                        switch ($user->roleId) {
+                            case UserRoleOption::SubAdmin->getUuid():
+                                try {
+                                    Mail::to($user->email)->send(new RegisteredSubAdminDataMail($user));
+
+                                    $this->loggingService->info('UsersController', 'Email data pendaftaran berhasil dikirim untuk user dari UsersController', [
+                                        'email' => $user->email,
+                                    ]);
+                                } catch (Exception $emailException) {
+                                    $this->loggingService->warning('UsersController', 'Gagal mengirim email data pendaftaran untuk user dari UsersController', [
+                                        'email' => $user->email,
+                                        'error' => $emailException->getMessage(),
+                                    ]);
+                                }
+                                break;
+                            case UserRoleOption::User->getUuid():
+                                try {
+                                    Mail::to($user->email)->send(new RegisteredUserDataMail($user));
+
+                                    $this->loggingService->info('UsersController', 'Email data pendaftaran berhasil dikirim untuk user dari UsersController', [
+                                        'email' => $user->email,
+                                    ]);
+                                } catch (Exception $emailException) {
+                                    $this->loggingService->warning('UsersController', 'Gagal mengirim email data pendaftaran untuk user dari UsersController', [
+                                        'email' => $user->email,
+                                        'error' => $emailException->getMessage(),
+                                    ]);
+                                }
+                                break;
+                        }
+
+                        // Clear session data
+                        session()->forget(['userId', 'type']);
+
+                        return redirect()
+                            ->route('user.index')
+                            ->with('success', 'Verifikasi email berhasil. Data pengguna telah dikirim ke email Anda');
+                    default:
+                        $this->loggingService->error('UsersController', 'Tipe OTP tidak diketahui', null, [
+                            'OTP Type' => $type,
+                        ]);
+
+                        return redirect()
+                            ->back()
+                            ->with('error', 'Terjadi kesalahan sistem. Coba lagi nanti');
+                }
+            }
+            throw new Exception('Session tidak valid. Silakan ulangi proses.');
+        } catch (Exception $e) {
+            $this->loggingService->error('UsersController', $e->getMessage(), $e, [
+                'request' => $request->all(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Gagal verifikasi. ' . $e->getMessage());
         }
     }
 
@@ -238,7 +345,10 @@ class UsersController extends Controller
      */
     public function edit($id)
     {
-        //
+        $data = $this->userRepository->getById($id);
+        $provinces = $this->wilayahService->getProvinces();
+
+        return view('user.form', compact('data', 'provinces'));
     }
 
     /**
@@ -257,5 +367,81 @@ class UsersController extends Controller
         $this->userRepository->delete($id);
 
         return redirect()->route('user.index')->with('success', 'Data berhasil dihapus');
+    }
+
+    public function roleApprove($id, $role)
+    {
+        try {
+            $input = [
+                'roleVerifiedAt' => now(),
+                'roleVerifiedBy' => Auth::user()->userId,
+                'status' => null
+            ];
+
+            switch ($role) {
+                case 'active':
+                    $input['status'] = UserStatusOption::Active->value;
+                    break;
+                case 'rejected':
+                    $input['status'] = UserStatusOption::Rejected->value;
+                    break;
+                default:
+                    $input['status'] = UserStatusOption::Pending->value;
+            }
+
+            $this->userRepository->update($id, $input);
+
+            return redirect()
+                ->back()
+                ->with('success', 'Status pengguna berhasil diverifikasi!');
+        } catch (Exception $e) {
+            $this->loggingService->error('UserController', 'Gagal merubah data status', $e, [
+                'id' => $id,
+                'input' => [
+                    'role-approval' => $role
+                ]
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Gagal merubah status karena kesalahan sistem. Coba lagi nanti');
+        }
+    }
+
+    public function statusUpdate($id, $status)
+    {
+        try {
+            $input = [
+                'status' => null
+            ];
+
+            switch ($status) {
+                case 'active':
+                    $input['status'] = UserStatusOption::Active->value;
+                    break;
+                case 'inactive':
+                    $input['status'] = UserStatusOption::InActive->value;
+                    break;
+                default:
+                    $input['status'] = UserStatusOption::Pending->value;
+            }
+
+            $this->userRepository->update($id, $input);
+
+            return redirect()
+                ->back()
+                ->with('success', 'Status pengguna berhasil diverifikasi!');
+        } catch (Exception $e) {
+            $this->loggingService->error('UserController', 'Gagal merubah data status', $e, [
+                'id' => $id,
+                'input' => [
+                    'status-update' => $status
+                ]
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Gagal merubah status karena kesalahan sistem. Coba lagi nanti');
+        }
     }
 }

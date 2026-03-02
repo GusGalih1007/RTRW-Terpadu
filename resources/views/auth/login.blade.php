@@ -97,15 +97,15 @@
                                     <div class="col-lg-12">
                                         <div class="form-group">
                                             <label for="email" class="form-label">E-mail</label>
-                                            <input type="email" name="email" class="form-control" required>
+                                            <input type="email" name="email" class="form-control" id="email" placeholder="Email..." required>
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group">
                                             <label for="password" class="form-label">Password</label>
-                                            <input type="password" name="password" class="form-control" required>
+                                            <input type="password" name="password" class="form-control" id="password" placeholder="Password..." required>
                                         </div>
-                                        {{-- <a href="{{ route('auth.forgot-password') }}">Lupa Password</a> --}}
+                                        <a href="{{ route('auth.forgot-password') }}">Lupa Password</a>
                                     </div>
                                     <div class="d-flex justify-content-center">
                                         <button type="submit" class="btn btn-primary">Sign In</button>

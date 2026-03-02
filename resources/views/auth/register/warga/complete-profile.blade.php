@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lengkapi Data Diri - RT/RW Terpadu</title>
+    <title>RT/RW Terpadu | Lengkapi Data Diri</title>
     <style>
         :root {
             --primary-color: #007bff;
@@ -28,6 +28,11 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
+            background-image: url('{{ asset('assets/images/auth/03.png') }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
         }
 
         .container {
@@ -258,7 +263,7 @@
                 <div class="form-row-3">
                     <div class="form-group">
                         <label for="nik">NIK <span class="required">*</span></label>
-                        <input type="number" id="nik" name="nik" value="{{ old('nik') }}" required>
+                        <input type="number" id="nik" name="nik" value="{{ old('nik') }}" placeholder="NIK" required>
                         <span class="text-muted">Nomor Induk Kependudukan (16 digit)</span>
                         @error('nik')
                             <div class="error-message" style="display: block;">{{ $message }}</div>
@@ -267,7 +272,7 @@
 
                     <div class="form-group">
                         <label for="username">Nama Lengkap <span class="required">*</span></label>
-                        <input type="text" id="username" name="username" value="{{ old('username') }}" required>
+                        <input type="text" id="username" name="username" value="{{ old('username') }}" placeholder="Nama panjang..." required>
                         <span class="text-muted">Sesuai KTP</span>
                         @error('username')
                             <div class="error-message" style="display: block;">{{ $message }}</div>
@@ -276,7 +281,7 @@
 
                     <div class="form-group">
                         <label for="phone">Nomor HP <span class="required">*</span></label>
-                        <input type="tel" id="phone" name="phone" value="{{ old('phone') }}" required>
+                        <input type="tel" id="phone" name="phone" value="{{ old('phone') }}" placeholder="Nomor HP" required>
                         <span class="text-muted">Nomor aktif untuk kontak darurat</span>
                         @error('phone')
                             <div class="error-message" style="display: block;">{{ $message }}</div>
@@ -365,7 +370,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="pekerjaan">Pekerjaan <span class="required">*</span></label>
-                        <input type="text" id="pekerjaan" name="pekerjaan" value="{{ old('pekerjaan') }}"
+                        <input type="text" id="pekerjaan" name="pekerjaan" value="{{ old('pekerjaan') }}" placeholder="Pekerjaan..."
                             required>
                         <span class="text-muted">Pekerjaan utama Anda</span>
                         @error('pekerjaan')
@@ -376,7 +381,7 @@
                     <div class="form-group">
                         <label for="anggotaKeluarga">Jumlah Anggota Keluarga <span class="required">*</span></label>
                         <input type="number" id="anggotaKeluarga" name="anggotaKeluarga"
-                            value="{{ old('anggotaKeluarga') }}" required>
+                            value="{{ old('anggotaKeluarga') }}" placeholder="Jumlah anggota keluarga..." required>
                         <span class="text-muted">Termasuk Anda</span>
                         @error('anggotaKeluarga')
                             <div class="error-message" style="display: block;">{{ $message }}</div>
@@ -385,8 +390,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="alamatDetail">Alamat Lengkap <span class="required">*</span></label>
-                    <textarea id="alamatDetail" name="alamatDetail" rows="4" required>{{ old('alamatDetail') }}</textarea>
+                    <label for="alamatDetail">Alamat Rumah <span class="required">*</span></label>
+                    <textarea id="alamatDetail" name="alamatDetail" rows="4" placeholder="Alamat rumah anda..." required>{{ old('alamatDetail') }}</textarea>
                     <span class="text-muted">RT/RW, Jalan, Nomor Rumah, dll</span>
                     @error('alamatDetail')
                         <div class="error-message" style="display: block;">{{ $message }}</div>

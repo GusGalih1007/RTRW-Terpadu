@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Interfaces\UserRepositoryInterface;
 use App\Models\Users;
+use Illuminate\Support\Facades\Crypt;
 
 class UserRepository implements UserRepositoryInterface
 {
@@ -28,12 +29,18 @@ class UserRepository implements UserRepositoryInterface
 
     public function store(array $data)
     {
+        $data['password'] = Crypt::encrypt($data['password']);
+
         return $this->model->create($data);
     }
 
     public function update(string $id, array $data)
     {
         $model = $this->getById($id);
+
+        if ($data['password']) {
+            $data['password'] = Crypt::encrypt($data['password']);
+        }
 
         $model->update($data);
 
