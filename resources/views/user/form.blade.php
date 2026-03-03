@@ -17,56 +17,56 @@
                     <h5 class="mb-4">Data Pribadi</h5>
                     <form method="POST" action="{{ route('user.store') }}">
                         @csrf
+
+                        @if ($data)
+                            @method('PUT')
+                        @endif
                         <div class="row">
                             <div class="form-group col-md-6 col-sm-12">
                                 <label for="username" class="form-label">Nama Panjang<span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="username" id="username"
-                                    placeholder="Nama panjang...">
+                                    placeholder="Nama panjang..." value="{{ old('username', $data->username ?? '') }}">
                             </div>
                             <div class="form-group col-md-6 col-sm-12">
                                 <label for="email">Email<span class="text-danger">*</span></label>
-                                <input type="email" id="email" class="form-control" name="email"
+                                <input type="email" id="email" class="form-control" value="{{ old('email', $data->email ?? '') }}" name="email"
                                     placeholder="contoh@email.com...">
                             </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-md-3 col-sm-12">
                                 <label for="nik" class="form-label">NIK<span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" name="nik" id="nik"
+                                <input type="number" class="form-control" name="nik" id="nik" value="{{ old('nik', $data->nik ?? '') }}"
                                     placeholder="16 digit NIK...">
                             </div>
                             <div class="form-group col-md-3 col-sm-12">
                                 <label for="phone" class="form-label">No. Telepon<span
                                         class="text-danger">*</span></label>
-                                <input type="number" class="form-control" name="phone" id="phone"
+                                <input type="number" class="form-control" name="phone" id="phone" value="{{ old('phone', $data->phone ?? '') }}"
                                     placeholder="Telepon...">
                             </div>
                             <div class="form-group col-md-3 col-sm-12">
                                 <label for="pekerjaan" class="form-label">Pekerjaan<span
                                         class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="pekerjaan" id="pekerjaan"
+                                <input type="text" class="form-control" name="pekerjaan" id="pekerjaan" value="{{ old('pekerjaan', $data->pekerjaan ?? '') }}"
                                     placeholder="Pekerjaan saat ini...">
                             </div>
                             <div class="form-group col-md-3 col-sm-12">
                                 <label for="anggotaKeluarga" class="form-label">Anggota Keluarga<span
                                         class="text-danger">*</span></label>
-                                <input type="number" class="form-control" name="anggotaKeluarga" id="anggotaKeluarga"
+                                <input type="number" class="form-control" name="anggotaKeluarga" id="anggotaKeluarga" value="{{ old('anggotaKeluaga', $data->anggotaKeluarga ?? '') }}"
                                     placeholder="Jumlah anggota...">
                             </div>
                         </div>
                         <div class="row">
-                                <label>Status<span
+                                <label for="status">Status<span
                                         class="text-danger">*</span></label>
                             <div class="form-group">
-                                <input type="radio" class="form-check-input" name="status" value="Active" id="activeStatus">
-                                <label class="form-check-label" for="activeStatus">
-                                    Aktif
-                                </label>
-                                <input type="radio" class="form-check-input" name="status" value="InActive" id="inactiveStatus">
-                                <label class="form-check-label" for="inactiveStatus">
-                                    Tidak Aktif
-                                </label>
+                                <select class="form-select" id="status">
+                                <option value="active" selected>Active</option>
+                                <option value="inactive" {{ $data ? ($data->status->value == 'inactive' ? 'selected' : '') : '' }}>InActive</option>
+                                </select>
                             </div>
                         </div>
                         <hr class="hr-horizontal">
@@ -118,7 +118,7 @@
                             <div class="form-group {{ Auth::user()->role->roleName != 'Sub-Admin' ? 'col-md-9 col-sm-12' : ''}}">
                                 <label for="alamatDetail" class="form-label">Alamat Rumah<span
                                         class="text-danger">*</span></label>
-                                <textarea name="alamatDetail" class="form-control" id="alamatDetail" placeholder="Jalan, Nomor rumah, dll..."></textarea>
+                                <textarea name="alamatDetail" class="form-control" id="alamatDetail" placeholder="Jalan, Nomor rumah, dll...">{{old('alamatDetail', $data->alamatDetail ?? '')}}</textarea>
                             </div>
                         </div>
                         <hr class="hr-horizontal">

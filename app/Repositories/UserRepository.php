@@ -38,7 +38,7 @@ class UserRepository implements UserRepositoryInterface
     {
         $model = $this->getById($id);
 
-        if ($data['password']) {
+        if (isset($data['password'])) {
             $data['password'] = Crypt::encrypt($data['password']);
         }
 

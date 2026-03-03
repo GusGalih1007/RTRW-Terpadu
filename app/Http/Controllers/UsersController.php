@@ -202,7 +202,8 @@ class UsersController extends Controller
             // Store user ID and OTP type in session for verification
             session([
                 'userId' => $user->userId,
-                'type' => OtpType::Register->value
+                'type' => OtpType::Register->value,
+                'method' => 'user-create'
             ]);
 
             return redirect()
