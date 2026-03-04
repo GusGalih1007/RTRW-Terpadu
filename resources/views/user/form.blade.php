@@ -59,7 +59,7 @@
                                     placeholder="Jumlah anggota...">
                             </div>
                         </div>
-                        <div class="row">
+                        {{-- <div class="row">
                                 <label for="status">Status<span
                                         class="text-danger">*</span></label>
                             <div class="form-group">
@@ -68,7 +68,7 @@
                                 <option value="inactive" {{ $data ? ($data->status->value == 'inactive' ? 'selected' : '') : '' }}>InActive</option>
                                 </select>
                             </div>
-                        </div>
+                        </div> --}}
                         <hr class="hr-horizontal">
                         <h5 class="mb-4">Alamat</h5>
                         <div class="row">

@@ -83,10 +83,10 @@ class UsersController extends Controller
                 'kodeKecamatan' => ['nullable'],
                 'kodeKelurahan' => ['nullable'],
                 'alamatDetail' => ['required', 'string'],
-                'status' => ['required'],
+                // 'status' => ['required'],
                 'pekerjaan' => ['required', 'string', 'max:100'],
                 'anggotaKeluarga' => ['required', 'numeric'],
-                'password' => ['nullable', 'string', 'confirmed', 'min:8'],
+                'password' => ['required', 'string', 'confirmed', 'min:8'],
                 'rtrw' => ['nullable'],
             ]);
 
@@ -110,12 +110,7 @@ class UsersController extends Controller
             $kecamatan = null;
             $kelurahan = null;
             $rtrw = null;
-
-            if ($request->status == 'Active') {
-                $status = UserStatusOption::Active->value;
-            } elseif ($request->status == 'InActive') {
-                $status = UserStatusOption::InActive->value;
-            }
+            $status = UserStatusOption::Active->value;
 
             switch ($authUser->roleId) {
                 case UserRoleOption::SYSAdmin->getUuid():
@@ -357,7 +352,149 @@ class UsersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            $validate = Validator::make($request->all(), [
+                'nik' => ['required', 'numeric', 'max_digits:16', 'min_digits:16'],
+                'username' => ['required', 'string', 'max:80'],
+                'email' => ['required', 'email'],
+                'phone' => ['required', 'numeric', 'min_digits:10'],
+                'role' => ['nullable', 'in:warga,ketua,petugas,admin,sysadmin'],
+                'kodeProvinsi' => ['nullable'],
+                'kodeKabupaten' => ['nullable'],
+                'kodeKecamatan' => ['nullable'],
+                'kodeKelurahan' => ['nullable'],
+                'alamatDetail' => ['required', 'string'],
+                // 'status' => ['required'],
+                'pekerjaan' => ['required', 'string', 'max:100'],
+                'anggotaKeluarga' => ['required', 'numeric'],
+                'password' => ['nullable', 'string', 'confirmed', 'min:8'],
+                'rtrw' => ['nullable'],
+            ]);
+
+            if ($validate->fails()) {
+                $this->loggingService->error('UserController', 'Gagal Validasi: ' . $validate->errors(), null, [
+                    'request' => $request->all(),
+                ]);
+
+                return redirect()
+                    ->back()
+                    ->withErrors($validate->errors())
+                    ->withInput($request->except('password'))
+                    ->with('error', 'Mohon lengkapi form diberikan dengan benar');
+            }
+
+            $status = null;
+            $authUser = Auth::user();
+            $role = null;
+            $provinsi = null;
+            $kabupaten = null;
+            $kecamatan = null;
+            $kelurahan = null;
+            $rtrw = null;
+            $status = UserStatusOption::Active->value;
+
+            switch ($authUser->roleId) {
+                case UserRoleOption::SYSAdmin->getUuid():
+                    $provinsi = $request->kodeProvinsi;
+                    $kabupaten = $request->kodeKabupaten;
+                    $kecamatan = $request->kodeKecamatan;
+                    $kelurahan = $request->kodeKelurahan;
+                    $rtrw = $request->rtrw;
+
+                    switch ($request->role) {
+                        case 'warga':
+                            $role = UserRoleOption::User->getUuid();
+                            break;
+                        case 'ketua':
+                            $role = UserRoleOption::SubAdmin->getUuid();
+                            break;
+                        case 'petugas':
+                            $role = UserRoleOption::Staff->getUuid();
+                            break;
+                        case 'admin':
+                            $role = UserRoleOption::Admin->getUuid();
+                            break;
+                        case 'sysadmin':
+                            $role = UserRoleOption::SYSAdmin->getUuid();
+                            break;
+                    }
+                    break;
+                case UserRoleOption::Admin->getUuid():
+                    $provinsi = $request->kodeProvinsi;
+                    $kabupaten = $request->kodeKabupaten;
+                    $kecamatan = $request->kodeKecamatan;
+                    $kelurahan = $request->kodeKelurahan;
+                    $rtrw = $request->rtrw;
+
+                    switch ($request->role) {
+                        case 'warga':
+                            $role = UserRoleOption::User->getUuid();
+                            break;
+                        case 'ketua':
+                            $role = UserRoleOption::SubAdmin->getUuid();
+                            break;
+                    }
+                    break;
+                case UserRoleOption::SubAdmin->getUuid():
+                    $provinsi = $authUser->kodeProvinsi;
+                    $kabupaten = $authUser->kodeKabupaten;
+                    $kecamatan = $authUser->kodeKecamatan;
+                    $kelurahan = $authUser->kodeKelurahan;
+                    $rtrw = $authUser->rtRwId;
+
+                    $role = UserRoleOption::User->getUuid();
+                    break;
+            }
+
+            $input = [
+                'nik' => $request->nik,
+                'username' => $request->username,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'roleId' => $role,
+                'kodeProvinsi' => $provinsi,
+                'kodeKabupaten' => $kabupaten,
+                'kodeKecamatan' => $kecamatan,
+                'kodeKelurahan' => $kelurahan,
+                'alamatDetail' => $request->alamatDetail,
+                'status' => $status,
+                'pekerjaan' => $request->pekerjaan,
+                'anggotaKeluarga' => $request->anggotaKeluarga,
+                'password' => $request->password,
+                'rtRwId' => $rtrw,
+                'roleVerifiedAt' => now(),
+                'roleVerifiedBy' => Auth::id() ?? null,
+                'createdBy' => Auth::id() ?? null,
+            ];
+
+            // Store user data
+            $user = $this->userRepository->update($id, $input);
+
+            // Generate OTP for email verification
+            $otp = $this->authService->generateOtp($user->email, OtpType::Register->value);
+
+            Mail::to($user->email)->send(new OtpMail($otp, 'Verifikasi Email'));
+
+            // Store user ID and OTP type in session for verification
+            session([
+                'userId' => $user->userId,
+                'type' => OtpType::Register->value,
+                'method' => 'user-create'
+            ]);
+
+            return redirect()
+                ->route('user.otp-verification', $user->userId)
+                ->with('success', 'Silakan verifikasi email Anda terlebih dahulu');
+        } catch (Exception $e) {
+            $this->loggingService->error('UserController', $e->getMessage(), $e, [
+                'request' => $request->all(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Terjadi kesalahan dalam sistem. Coba lagi nanti')
+                ->withInput($request->except('password'));
+        }
     }
 
     /**
