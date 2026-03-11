@@ -46,7 +46,7 @@ class AuthRepository implements AuthRepositoryInterface
                 throw new Exception('Akun tidak ditemukan');
             }
 
-            if ($data['password']) {
+            if (isset($data['password'])) {
                 $data['password'] = Crypt::encrypt($data['password']);
             }
 

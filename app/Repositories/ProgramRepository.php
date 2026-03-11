@@ -26,6 +26,11 @@ class ProgramRepository implements ProgramRepositoryInterface
     {
         return $this->model->findOrFail($id);
     }
+
+    public function getByRtrw(string $id)
+    {
+        return $this->model->where('rtRwId', $id)->get();
+    }
     
     public function store(array $data)
     {

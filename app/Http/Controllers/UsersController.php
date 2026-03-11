@@ -8,6 +8,9 @@ use App\Enums\OtpType;
 use App\Mail\OtpMail;
 use App\Mail\RegisteredUserDataMail;
 use App\Mail\RegisteredSubAdminDataMail;
+use App\Mail\RegisteredSysAdminDataMail;
+use App\Mail\RegisteredAdminDataMail;
+use App\Repositories\RtRwRepository;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
 use App\Services\LoggingService;
@@ -31,16 +34,20 @@ class UsersController extends Controller
 
     protected $authService;
 
+    protected $rtRwRepository;
+
     public function __construct(
         UserRepository $userRepository,
         LoggingService $loggingService,
         WilayahService $wilayahService,
-        AuthService $authService
+        AuthService $authService,
+        RtRwRepository $rtRwRepository
     ) {
         $this->userRepository = $userRepository;
         $this->loggingService = $loggingService;
         $this->wilayahService = $wilayahService;
         $this->authService = $authService;
+        $this->rtRwRepository = $rtRwRepository;
     }
 
     /**
@@ -50,7 +57,9 @@ class UsersController extends Controller
     {
         $user = Auth::user();
 
-        switch ($user->roleId) {
+        $data = null;
+
+        switch ($user->role->roleId) {
             case UserRoleOption::SYSAdmin->getUuid():
                 $data = $this->userRepository->getAll();
                 break;
@@ -60,10 +69,10 @@ class UsersController extends Controller
             case UserRoleOption::SubAdmin->getUuid();
                 $data = $this->userRepository->getByRtrw($user->rtRwId);
                 break;
+            default:
+                abort(403, 'Anda tidak memiliki hak untuk mengakses halaman ini');
         }
         $data = $this->wilayahService->mapWilayahCollection($data);
-
-        // dd($data);
 
         return view('user.index', compact('data'));
     }
@@ -73,10 +82,15 @@ class UsersController extends Controller
      */
     public function create()
     {
+        $user = Auth::user();
         $data = null;
+        $rtrws = null;
         $provinces = $this->wilayahService->getProvinces();
+        if (Auth::user()->role->roleName === 'Admin') {
+            $rtrws = $this->rtRwRepository->getByKelurahan($user->kodeKelurahan);
+        }
 
-        return view('user.form', compact('data', 'provinces'));
+        return view('user.form', compact('data', 'provinces', 'rtrws'));
     }
 
     /**
@@ -287,6 +301,34 @@ class UsersController extends Controller
 
                         // Send email with user data and QR code
                         switch ($user->roleId) {
+                            case UserRoleOption::SYSAdmin->getUuid():
+                                try {
+                                    Mail::to($user->email)->send(new RegisteredSysAdminDataMail($user));
+
+                                    $this->loggingService->info('UsersController', 'Email data pendaftaran berhasil dikirim untuk user dari UsersController', [
+                                        'email' => $user->email,
+                                    ]);
+                                } catch (Exception $emailException) {
+                                    $this->loggingService->warning('UsersController', 'Gagal mengirim email data pendaftaran untuk user dari UsersController', [
+                                        'email' => $user->email,
+                                        'error' => $emailException->getMessage(),
+                                    ]);
+                                }
+                                break;
+                            case UserRoleOption::Admin->getUuid():
+                                try {
+                                    Mail::to($user->email)->send(new RegisteredAdminDataMail($user));
+
+                                    $this->loggingService->info('UsersController', 'Email data pendaftaran berhasil dikirim untuk user dari UsersController', [
+                                        'email' => $user->email,
+                                    ]);
+                                } catch (Exception $emailException) {
+                                    $this->loggingService->warning('UsersController', 'Gagal mengirim email data pendaftaran untuk user dari UsersController', [
+                                        'email' => $user->email,
+                                        'error' => $emailException->getMessage(),
+                                    ]);
+                                }
+                                break;
                             case UserRoleOption::SubAdmin->getUuid():
                                 try {
                                     Mail::to($user->email)->send(new RegisteredSubAdminDataMail($user));
@@ -402,7 +444,7 @@ class UsersController extends Controller
                 // 'status' => ['required'],
                 'pekerjaan' => ['required', 'string', 'max:100'],
                 'anggotaKeluarga' => ['required', 'numeric'],
-                'password' => ['required', 'string', 'confirmed', 'min:8'],
+                'password' => ['nullable', 'string', 'confirmed', 'min:8'],
                 'rtrw' => [
                     Rule::requiredIf(in_array($role, ['SYSAdmin','Admin']))
                 ],

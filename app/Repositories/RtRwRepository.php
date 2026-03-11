@@ -59,7 +59,7 @@ class RtRwRepository implements RtRwRepositoryInterface
         return true;
     }
 
-    public function getByKelurahan(int $id)
+    public function getByKelurahan($id)
     {
         return $this->model->where('kodeKelurahan', $id)->get();
     }

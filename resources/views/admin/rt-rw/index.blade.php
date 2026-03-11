@@ -6,14 +6,14 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between">
                     <div class="header-title">
-                        <h4 class="card-title">Data RT-RW</h4>
+                        <h4 class="card-title">Data RT/RW</h4>
                     </div>
                     <div>
                         <a href="{{ route('admin.rt-rw.create') }}" class="btn btn-primary">Tambah</a>
                     </div>
                 </div>
                 <div class="card-body">
-                    <p>Data ini merupakan data RT-RW yang sudah terdaftar dalam sistem. Bila ada RT-RW anda yang
+                    <p>Data ini merupakan data RT/RW yang sudah terdaftar dalam sistem. Bila ada RT/RW anda yang
                         belum terdaftar, Silahkan tambahkan data dengan menekan tombol diatas</p>
                     <div class="custom-datatable-entries">
                         <table id="datatable" class="table table-bordered table-hover" data-toggle="data-table">

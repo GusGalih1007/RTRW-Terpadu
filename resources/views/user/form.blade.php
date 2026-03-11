@@ -117,8 +117,14 @@
                                 <div class="form-group col-md-3 col-sm-12">
                                     <label for="rtrw" class="form-label">Nomor RT/RW<span
                                             class="text-danger">*</span></label>
-                                    <select name="rtrw" class="form-select" id="rtrw" disabled>
+                                    <select name="rtrw" class="form-select" id="rtrw"
+                                        {{ Auth::user()->role->roleName === 'SYSAdmin' ? 'disabled' : '' }}>
                                         <option value="" hidden selected>Pilih RT/RW</option>
+                                        @if (isset($rtrws))
+                                            @foreach ($rtrws as $rtrw)
+                                                <option value="{{ $rtrw->rtRwId }}">{{ $rtrw->rt . '/' . $rtrw->rw }}</option>
+                                            @endforeach
+                                        @endif
                                     </select>
                                 </div>
                                 <div class="form-group col-md-3 col-sm-12">

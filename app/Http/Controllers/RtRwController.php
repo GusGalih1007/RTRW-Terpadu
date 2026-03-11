@@ -9,6 +9,8 @@ use App\Services\WilayahService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class RtRwController extends Controller
 {
@@ -29,8 +31,20 @@ class RtRwController extends Controller
      */
     public function index()
     {
-        $data = $this->rtrwRepository->getAll();
+        $user = Auth::user();
+        switch ($user->role->roleName) {
+            case 'Admin':
+                $data = $this->rtrwRepository->getByKelurahan($user->kodeKelurahan);
+                break;
+            case 'SYSAdmin':
+                $data = $this->rtrwRepository->getAll();
+                break;
+            default:
+                abort(403, 'Anda tidak memiliki hak untuk mengakses halaman ini');
+        }
         $data = $this->wilayahService->mapWilayahCollection($data);
+
+        // dd($data);
 
         return view('admin.rt-rw.index', compact('data'));
     }
@@ -51,15 +65,24 @@ class RtRwController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
         try {
             $validate = Validator::make($request->All(), [
                 'rt' => ['required', 'numeric', 'max_digits:3'],
                 'rw' => ['required', 'numeric', 'max_digits:3'],
-                'kodeProvinsi' => ['required'],
-                'kodeKabupaten' => ['required'],
-                'kodeKecamatan' => ['required'],
-                'kodeKelurahan' => ['required'],
-                'alamatDetail'  => ['nullable', 'string']
+                'kodeProvinsi' => [
+                    Rule::requiredIf($user->role->roleName === 'SYSAdmin')
+                ],
+                'kodeKabupaten' => [
+                    Rule::requiredIf($user->role->roleName === 'SYSAdmin')
+                ],
+                'kodeKecamatan' => [
+                    Rule::requiredIf($user->role->roleName === 'SYSAdmin')
+                ],
+                'kodeKelurahan' => [
+                    Rule::requiredIf($user->role->roleName === 'SYSAdmin')
+                ],
+                'alamatDetail' => ['nullable', 'string']
             ]);
 
             if ($validate->fails()) {
@@ -75,14 +98,34 @@ class RtRwController extends Controller
                     ->with('error', 'Mohon lengkapi form yang diberikan');
             }
 
+            $kodeProvinsi = null;
+            $kodeKabupaten = null;
+            $kodeKecamatan = null;
+            $kodeKelurahan = null;
+
+            switch ($user->role->roleName) {
+                case 'SYSAdmin':
+                    $kodeProvinsi = $request->kodeProvinsi;
+                    $kodeKabupaten = $request->kodeKabupaten;
+                    $kodeKecamatan = $request->kodeKecamatan;
+                    $kodeKelurahan = $request->kodeKelurahan;
+                    break;
+                case 'Admin':
+                    $kodeProvinsi = $user->kodeProvinsi;
+                    $kodeKabupaten = $user->kodeKabupaten;
+                    $kodeKecamatan = $user->kodeKecamatan;
+                    $kodeKelurahan = $user->kodeKelurahan;
+                    break;
+            }
+
             $input = [
                 'rt' => $request->rt,
                 'rw' => $request->rw,
-                'kodeProvinsi' =>  $request->kodeProvinsi,
-                'kodeKabupaten' => $request->kodeKabupaten,
-                'kodeKecamatan' => $request->kodeKecamatan,
-                'kodeKelurahan' => $request->kodeKelurahan,
-                'alamatDetail'  => $request->alamatDetail
+                'kodeProvinsi' => $kodeProvinsi,
+                'kodeKabupaten' => $kodeKabupaten,
+                'kodeKecamatan' => $kodeKecamatan,
+                'kodeKelurahan' => $kodeKelurahan,
+                'alamatDetail' => $request->alamatDetail
             ];
 
             $newData = $this->rtrwRepository->store($input);
@@ -138,14 +181,23 @@ class RtRwController extends Controller
      */
     public function update(Request $request, $data)
     {
+        $user = Auth::user();
         try {
             $validate = Validator::make($request->All(), [
                 'rt' => ['required', 'numeric', 'max_digits:3'],
                 'rw' => ['required', 'numeric', 'max_digits:3'],
-                'kodeProvinsi'  => ['required'],
-                'kodeKabupaten' => ['required'],
-                'kodeKecamatan' => ['required'],
-                'kodeKelurahan' => ['required'],
+                'kodeProvinsi' => [
+                    Rule::requiredIf($user->role->roleName === 'SYSAdmin')
+                ],
+                'kodeKabupaten' => [
+                    Rule::requiredIf($user->role->roleName === 'SYSAdmin')
+                ],
+                'kodeKecamatan' => [
+                    Rule::requiredIf($user->role->roleName === 'SYSAdmin')
+                ],
+                'kodeKelurahan' => [
+                    Rule::requiredIf($user->role->roleName === 'SYSAdmin')
+                ],
                 'alamatDetail' => ['nullable', 'string']
             ]);
 
@@ -162,14 +214,34 @@ class RtRwController extends Controller
                     ->with('error', 'Mohon lengkapi form yang diberikan');
             }
 
+            $kodeProvinsi = null;
+            $kodeKabupaten = null;
+            $kodeKecamatan = null;
+            $kodeKelurahan = null;
+
+            switch ($user->role->roleName) {
+                case 'SYSAdmin':
+                    $kodeProvinsi = $request->kodeProvinsi;
+                    $kodeKabupaten = $request->kodeKabupaten;
+                    $kodeKecamatan = $request->kodeKecamatan;
+                    $kodeKelurahan = $request->kodeKelurahan;
+                    break;
+                case 'Admin':
+                    $kodeProvinsi = $user->kodeProvinsi;
+                    $kodeKabupaten = $user->kodeKabupaten;
+                    $kodeKecamatan = $user->kodeKecamatan;
+                    $kodeKelurahan = $user->kodeKelurahan;
+                    break;
+            }
+
             $input = [
                 'rt' => $request->rt,
                 'rw' => $request->rw,
-                'kodeProvinsi' =>  $request->kodeProvinsi,
-                'kodeKabupaten' => $request->kodeKabupaten,
-                'kodeKecamatan' => $request->kodeKecamatan,
-                'kodeKelurahan' => $request->kodeKelurahan,
-                'alamatDetail'  => $request->alamatDetail
+                'kodeProvinsi' => $kodeProvinsi,
+                'kodeKabupaten' => $kodeKabupaten,
+                'kodeKecamatan' => $kodeKecamatan,
+                'kodeKelurahan' => $kodeKelurahan,
+                'alamatDetail' => $request->alamatDetail
             ];
 
             $this->rtrwRepository->update($data, $input);

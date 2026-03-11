@@ -82,7 +82,7 @@ class RegisteredSysAdminDataMail extends Mailable
     public function build()
     {
         return $this->subject($this->subjectText)
-            ->view('mails.registered-subadmin')
+            ->view('mails.registered-sysadmin')
             ->with([
                 'user' => $this->user,
                 'wilayahData' => $this->wilayahData,

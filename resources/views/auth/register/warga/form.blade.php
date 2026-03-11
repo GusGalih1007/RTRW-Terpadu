@@ -104,7 +104,7 @@
                                     <div class="col-lg-12">
                                         <div class="form-group">
                                             <label for="password" class="form-label">Password</label>
-                                            <input type="password" name="password" id="password" class="form-control" placeholder="Password..." required>
+                                            <input type="password" name="password" id="password" class="form-control" placeholder="Min: 8 karakter" required>
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
