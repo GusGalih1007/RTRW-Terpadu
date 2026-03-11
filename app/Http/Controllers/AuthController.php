@@ -265,10 +265,17 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
+            $messages = [
+                'email.required' => 'Email diperlukan untuk login!',
+                'email.email' => 'Format Email tidak valid.',
+                'password.required' => 'Password diperlukan untuk login.',
+                'password.min' => 'Password minimal 8 karakter.',
+            ];
+
             $validate = Validator::make($request->all(), [
                 'email' => ['required', 'email'],
                 'password' => ['required', 'min:8'],
-            ]);
+            ], $messages);
 
             if ($validate->fails()) {
                 $this->loggingService->error('AuthController', 'Gagal Validasi', null, [
@@ -279,7 +286,7 @@ class AuthController extends Controller
                     ->back()
                     ->withErrors($validate->errors())
                     ->withInput($request->all())
-                    ->with('error', 'Mohon lengkapi form yang diberikan');
+                    ->with('error', $validate->errors());
             }
 
             $user = $this->authService->getUserByEmail($request->email);

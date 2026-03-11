@@ -27,6 +27,16 @@ class UserRepository implements UserRepositoryInterface
         return $this->model->find($id);
     }
 
+    public function getByRtrw(string $rtrw)
+    {
+        return $this->model->where('rtRwId', $rtrw)->get();
+    }
+
+    public function getByKelurahan($kodeKelurahan)
+    {
+        return $this->model->where('kodeKelurahan', $kodeKelurahan)->get();
+    }
+
     public function store(array $data)
     {
         $data['password'] = Crypt::encrypt($data['password']);

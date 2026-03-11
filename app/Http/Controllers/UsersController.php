@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 use function Symfony\Component\Clock\now;
 
@@ -47,7 +48,19 @@ class UsersController extends Controller
      */
     public function index()
     {
-        $data = $this->userRepository->getAll();
+        $user = Auth::user();
+
+        switch ($user->roleId) {
+            case UserRoleOption::SYSAdmin->getUuid():
+                $data = $this->userRepository->getAll();
+                break;
+            case UserRoleOption::Admin->getUuid():
+                $data = $this->userRepository->getByKelurahan($user->kodeKelurahan);
+                break;
+            case UserRoleOption::SubAdmin->getUuid();
+                $data = $this->userRepository->getByRtrw($user->rtRwId);
+                break;
+        }
         $data = $this->wilayahService->mapWilayahCollection($data);
 
         // dd($data);
@@ -72,22 +85,34 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         try {
+            $role = Auth::user()->role->roleName;
+
             $validate = Validator::make($request->all(), [
                 'nik' => ['required', 'numeric', 'max_digits:16', 'min_digits:16'],
                 'username' => ['required', 'string', 'max:80'],
                 'email' => ['required', 'email'],
                 'phone' => ['required', 'numeric', 'min_digits:10'],
                 'role' => ['nullable', 'in:warga,ketua,petugas,admin,sysadmin'],
-                'kodeProvinsi' => ['nullable'],
-                'kodeKabupaten' => ['nullable'],
-                'kodeKecamatan' => ['nullable'],
-                'kodeKelurahan' => ['nullable'],
+                'kodeProvinsi' => [
+                    Rule::requiredIf($role === 'SYSAdmin')
+                ],
+                'kodeKabupaten' => [
+                    Rule::requiredIf($role === 'SYSAdmin')
+                ],
+                'kodeKecamatan' => [
+                    Rule::requiredIf($role === 'SYSAdmin')
+                ],
+                'kodeKelurahan' => [
+                    Rule::requiredIf($role === 'SYSAdmin')
+                ],
                 'alamatDetail' => ['required', 'string'],
                 // 'status' => ['required'],
                 'pekerjaan' => ['required', 'string', 'max:100'],
                 'anggotaKeluarga' => ['required', 'numeric'],
                 'password' => ['required', 'string', 'confirmed', 'min:8'],
-                'rtrw' => ['nullable'],
+                'rtrw' => [
+                    Rule::requiredIf(in_array($role, ['SYSAdmin','Admin']))
+                ],
             ]);
 
             if ($validate->fails()) {
@@ -139,10 +164,10 @@ class UsersController extends Controller
                     }
                     break;
                 case UserRoleOption::Admin->getUuid():
-                    $provinsi = $request->kodeProvinsi;
-                    $kabupaten = $request->kodeKabupaten;
-                    $kecamatan = $request->kodeKecamatan;
-                    $kelurahan = $request->kodeKelurahan;
+                    $provinsi = $authUser->kodeProvinsi;
+                    $kabupaten = $authUser->kodeKabupaten;
+                    $kecamatan = $authUser->kodeKecamatan;
+                    $kelurahan = $authUser->kodeKelurahan;
                     $rtrw = $request->rtrw;
 
                     switch ($request->role) {
@@ -353,22 +378,34 @@ class UsersController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            $role = Auth::user()->role->roleName;
+
             $validate = Validator::make($request->all(), [
                 'nik' => ['required', 'numeric', 'max_digits:16', 'min_digits:16'],
                 'username' => ['required', 'string', 'max:80'],
                 'email' => ['required', 'email'],
                 'phone' => ['required', 'numeric', 'min_digits:10'],
                 'role' => ['nullable', 'in:warga,ketua,petugas,admin,sysadmin'],
-                'kodeProvinsi' => ['nullable'],
-                'kodeKabupaten' => ['nullable'],
-                'kodeKecamatan' => ['nullable'],
-                'kodeKelurahan' => ['nullable'],
+                'kodeProvinsi' => [
+                    Rule::requiredIf($role === 'SYSAdmin')
+                ],
+                'kodeKabupaten' => [
+                    Rule::requiredIf($role === 'SYSAdmin')
+                ],
+                'kodeKecamatan' => [
+                    Rule::requiredIf($role === 'SYSAdmin')
+                ],
+                'kodeKelurahan' => [
+                    Rule::requiredIf($role === 'SYSAdmin')
+                ],
                 'alamatDetail' => ['required', 'string'],
                 // 'status' => ['required'],
                 'pekerjaan' => ['required', 'string', 'max:100'],
                 'anggotaKeluarga' => ['required', 'numeric'],
-                'password' => ['nullable', 'string', 'confirmed', 'min:8'],
-                'rtrw' => ['nullable'],
+                'password' => ['required', 'string', 'confirmed', 'min:8'],
+                'rtrw' => [
+                    Rule::requiredIf(in_array($role, ['SYSAdmin','Admin']))
+                ],
             ]);
 
             if ($validate->fails()) {
@@ -460,12 +497,16 @@ class UsersController extends Controller
                 'status' => $status,
                 'pekerjaan' => $request->pekerjaan,
                 'anggotaKeluarga' => $request->anggotaKeluarga,
-                'password' => $request->password,
+                // 'password' => $request->password,
                 'rtRwId' => $rtrw,
                 'roleVerifiedAt' => now(),
                 'roleVerifiedBy' => Auth::id() ?? null,
                 'createdBy' => Auth::id() ?? null,
             ];
+
+            if (filled(value: $request->password)) {
+                $input['password'] = $request->password;
+            }
 
             // Store user data
             $user = $this->userRepository->update($id, $input);
@@ -473,13 +514,13 @@ class UsersController extends Controller
             // Generate OTP for email verification
             $otp = $this->authService->generateOtp($user->email, OtpType::Register->value);
 
-            Mail::to($user->email)->send(new OtpMail($otp, 'Verifikasi Email'));
+            Mail::to($user->email)->send(new OtpMail($otp, 'Verifikasi Perubahan Data'));
 
             // Store user ID and OTP type in session for verification
             session([
                 'userId' => $user->userId,
                 'type' => OtpType::Register->value,
-                'method' => 'user-create'
+                'method' => 'user-update'
             ]);
 
             return redirect()

@@ -167,7 +167,7 @@ class AuthService
         try 
         {
 
-            Auth::login($user);
+            Auth::login($user, true);
 
             return true;
         } catch (Exception $e) {

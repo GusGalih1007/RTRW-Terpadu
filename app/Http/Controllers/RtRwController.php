@@ -146,6 +146,7 @@ class RtRwController extends Controller
                 'kodeKabupaten' => ['required'],
                 'kodeKecamatan' => ['required'],
                 'kodeKelurahan' => ['required'],
+                'alamatDetail' => ['nullable', 'string']
             ]);
 
             if ($validate->fails()) {
@@ -168,9 +169,10 @@ class RtRwController extends Controller
                 'kodeKabupaten' => $request->kodeKabupaten,
                 'kodeKecamatan' => $request->kodeKecamatan,
                 'kodeKelurahan' => $request->kodeKelurahan,
+                'alamatDetail'  => $request->alamatDetail
             ];
 
-            $data->update($input);
+            $this->rtrwRepository->update($data, $input);
 
             return redirect()
                 ->route('admin.rt-rw')

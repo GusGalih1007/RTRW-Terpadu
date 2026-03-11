@@ -15,7 +15,7 @@
                         Pastikan data yang dimasukkan sudah lengkap dan sesuai dengan data asli milik warga
                     </p>
                     <h5 class="mb-4">Data Pribadi</h5>
-                    <form method="POST" action="{{ route('user.store') }}">
+                    <form method="POST" action="{{ $data ? route('user.update', $data->userId) : route('user.store') }}">
                         @csrf
 
                         @if ($data)
@@ -30,32 +30,35 @@
                             </div>
                             <div class="form-group col-md-6 col-sm-12">
                                 <label for="email">Email<span class="text-danger">*</span></label>
-                                <input type="email" id="email" class="form-control" value="{{ old('email', $data->email ?? '') }}" name="email"
+                                <input type="email" id="email" class="form-control"
+                                    value="{{ old('email', $data->email ?? '') }}" name="email"
                                     placeholder="contoh@email.com...">
                             </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-md-3 col-sm-12">
                                 <label for="nik" class="form-label">NIK<span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" name="nik" id="nik" value="{{ old('nik', $data->nik ?? '') }}"
-                                    placeholder="16 digit NIK...">
+                                <input type="number" class="form-control" name="nik" id="nik"
+                                    value="{{ old('nik', $data->nik ?? '') }}" placeholder="16 digit NIK...">
                             </div>
                             <div class="form-group col-md-3 col-sm-12">
                                 <label for="phone" class="form-label">No. Telepon<span
                                         class="text-danger">*</span></label>
-                                <input type="number" class="form-control" name="phone" id="phone" value="{{ old('phone', $data->phone ?? '') }}"
-                                    placeholder="Telepon...">
+                                <input type="number" class="form-control" name="phone" id="phone"
+                                    value="{{ old('phone', $data->phone ?? '') }}" placeholder="Telepon...">
                             </div>
                             <div class="form-group col-md-3 col-sm-12">
                                 <label for="pekerjaan" class="form-label">Pekerjaan<span
                                         class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="pekerjaan" id="pekerjaan" value="{{ old('pekerjaan', $data->pekerjaan ?? '') }}"
+                                <input type="text" class="form-control" name="pekerjaan" id="pekerjaan"
+                                    value="{{ old('pekerjaan', $data->pekerjaan ?? '') }}"
                                     placeholder="Pekerjaan saat ini...">
                             </div>
                             <div class="form-group col-md-3 col-sm-12">
                                 <label for="anggotaKeluarga" class="form-label">Anggota Keluarga<span
                                         class="text-danger">*</span></label>
-                                <input type="number" class="form-control" name="anggotaKeluarga" id="anggotaKeluarga" value="{{ old('anggotaKeluaga', $data->anggotaKeluarga ?? '') }}"
+                                <input type="number" class="form-control" name="anggotaKeluarga" id="anggotaKeluarga"
+                                    value="{{ old('anggotaKeluaga', $data->anggotaKeluarga ?? '') }}"
                                     placeholder="Jumlah anggota...">
                             </div>
                         </div>
@@ -72,41 +75,45 @@
                         <hr class="hr-horizontal">
                         <h5 class="mb-4">Alamat</h5>
                         <div class="row">
-                            @if (Auth::user()->role->roleName != 'Sub-Admin')
-                                <div class="form-group col-md-3 col-sm-12">
-                                    <label for="kodeProvinsi" class="form-label">Provinsi<span
-                                            class="text-danger">*</span></label>
-                                    <select name="kodeProvinsi" class="form-select" id="kodeProvinsi">
-                                        <option value="" hidden selected>Pilih Provinsi</option>
-                                        @foreach ($provinces as $province)
-                                            <option value="{{ $province['id'] }}"
-                                                {{ $data ? ($data->kodeProvinsi == $province['id'] ? 'selected' : '') : '' }}>
-                                                {{ $province['name'] }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-3 col-sm-12">
-                                    <label for="kodeKabupaten" class="form-label">Kabupaten<span
-                                            class="text-danger">*</span></label>
-                                    <select name="kodeKabupaten" class="form-select" id="kodeKabupaten" disabled>
-                                        <option value="" hidden selected>Pilih Kabupaten</option>
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-3 col-sm-12">
-                                    <label for="kodeKecamatan" class="form-label">Kecamatan<span
-                                            class="text-danger">*</span></label>
-                                    <select name="kodeKecamatan" class="form-select" id="kodeKecamatan" disabled>
-                                        <option value="" hidden selected>Pilih Kecamatan</option>
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-3 col-sm-12">
-                                    <label for="kodeKelurahan" class="form-label">Kelurahan<span
-                                            class="text-danger">*</span></label>
-                                    <select name="kodeKelurahan" class="form-select" id="kodeKelurahan" disabled>
-                                        <option value="" hidden selected>Pilih Kelurahan</option>
-                                    </select>
-                                </div>
+                            @if (Auth::user()->role->roleName != 'Sub-Admin' &&
+                                    Auth::user()->role->roleName != 'User' &&
+                                    Auth::user()->role->roleName != 'Staff')
+                                @if (Auth::user()->role->roleName == 'SYSAdmin')
+                                    <div class="form-group col-md-3 col-sm-12">
+                                        <label for="kodeProvinsi" class="form-label">Provinsi<span
+                                                class="text-danger">*</span></label>
+                                        <select name="kodeProvinsi" class="form-select" id="kodeProvinsi">
+                                            <option value="" hidden selected>Pilih Provinsi</option>
+                                            @foreach ($provinces as $province)
+                                                <option value="{{ $province['id'] }}"
+                                                    {{ $data ? ($data->kodeProvinsi == $province['id'] ? 'selected' : '') : '' }}>
+                                                    {{ $province['name'] }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-sm-12">
+                                        <label for="kodeKabupaten" class="form-label">Kabupaten<span
+                                                class="text-danger">*</span></label>
+                                        <select name="kodeKabupaten" class="form-select" id="kodeKabupaten" disabled>
+                                            <option value="" hidden selected>Pilih Kabupaten</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-sm-12">
+                                        <label for="kodeKecamatan" class="form-label">Kecamatan<span
+                                                class="text-danger">*</span></label>
+                                        <select name="kodeKecamatan" class="form-select" id="kodeKecamatan" disabled>
+                                            <option value="" hidden selected>Pilih Kecamatan</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-sm-12">
+                                        <label for="kodeKelurahan" class="form-label">Kelurahan<span
+                                                class="text-danger">*</span></label>
+                                        <select name="kodeKelurahan" class="form-select" id="kodeKelurahan" disabled>
+                                            <option value="" hidden selected>Pilih Kelurahan</option>
+                                        </select>
+                                    </div>
+                                @endif
                                 <div class="form-group col-md-3 col-sm-12">
                                     <label for="rtrw" class="form-label">Nomor RT/RW<span
                                             class="text-danger">*</span></label>
@@ -114,11 +121,37 @@
                                         <option value="" hidden selected>Pilih RT/RW</option>
                                     </select>
                                 </div>
+                                <div class="form-group col-md-3 col-sm-12">
+                                    <label for="role" class="form-label">Jenis Pengguna<span
+                                            class="text-danger">*</span></label>
+                                    <select name="role" class="form-select" id="role">
+                                        <option value="" hidden selected>Pilih Role</option>
+                                        <option value="warga"
+                                            {{ $data ? ($data->role->roleName == 'User' ? 'selected' : '') : '' }}>Warga
+                                        </option>
+                                        <option value="ketua"
+                                            {{ $data ? ($data->role->roleName == 'Sub-Admin' ? 'selected' : '') : '' }}>
+                                            Ketua RT-RW</option>
+                                        @if (Auth::user()->role->roleName == 'SYSAdmin')
+                                            <option value="admin"
+                                                {{ $data ? ($data->role->roleName == 'Admin' ? 'selected' : '') : '' }}>
+                                                Ketua Kelurahan</option>
+                                            <option value="sysadmin"
+                                                {{ $data ? ($data->role->roleName == 'SYSAdmin' ? 'selected' : '') : '' }}>
+                                                SYSAdmin</option>
+                                        @endif
+                                    </select>
+                                </div>
                             @endif
-                            <div class="form-group {{ Auth::user()->role->roleName != 'Sub-Admin' ? 'col-md-9 col-sm-12' : ''}}">
+                            <div
+                                class="form-group {{ Auth::user()->role->roleName != 'Sub-Admin' &&
+                                Auth::user()->role->roleName != 'User' &&
+                                Auth::user()->role->roleName != 'Staff'
+                                    ? 'col-md-6 col-sm-12'
+                                    : '' }}">
                                 <label for="alamatDetail" class="form-label">Alamat Rumah<span
                                         class="text-danger">*</span></label>
-                                <textarea name="alamatDetail" class="form-control" id="alamatDetail" placeholder="Jalan, Nomor rumah, dll...">{{old('alamatDetail', $data->alamatDetail ?? '')}}</textarea>
+                                <textarea name="alamatDetail" class="form-control" id="alamatDetail" placeholder="Jalan, Nomor rumah, dll...">{{ old('alamatDetail', $data->alamatDetail ?? '') }}</textarea>
                             </div>
                         </div>
                         <hr class="hr-horizontal">
@@ -176,7 +209,7 @@
             kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
             rtRwSelect.innerHTML = '<option value="" hidden selected>Pilih RT/RW</option>';
             rtRwSelect.disabled = true;
-            
+
             kabupatenSelect.disabled = false;
             kecamatanSelect.disabled = true;
             kelurahanSelect.disabled = true;
@@ -223,7 +256,7 @@
             kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
             rtRwSelect.innerHTML = '<option value="" hidden selected>Pilih RT/RW</option>';
             rtRwSelect.disabled = true;
-            
+
             kecamatanSelect.disabled = false;
             kelurahanSelect.disabled = true;
 
@@ -266,7 +299,7 @@
             kelurahanSelect.innerHTML = '<option value="">Memuat...</option>';
             rtRwSelect.innerHTML = '<option value="" hidden selected>Pilih RT/RW</option>';
             rtRwSelect.disabled = true;
-            
+
             kelurahanSelect.disabled = false;
 
             if (kecamatanId) {

@@ -30,16 +30,12 @@ class RtRwRepository implements RtRwRepositoryInterface
 
     public function store(array $data)
     {
-        $data['password'] = Crypt::encrypt($data['password']);
-
         return $this->model->create($data);
     }
 
     public function update(string $id, array $data)
     {
         $model = $this->model->findOrFail($id);
-
-        $data['password'] = Crypt::encrypt($data['password']);
 
         $model->update($data);
 
