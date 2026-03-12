@@ -74,10 +74,7 @@
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="../dashboard/app/user-profile.html">Profile</a></li>
-                        <li><a class="dropdown-item" href="../dashboard/app/user-privacy-setting.html">Privacy
-                                Setting</a></li>
-                        <li>
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
                             <hr class="dropdown-divider">
                         </li>
                         <li><a class="dropdown-item" href="{{ route('auth.logout') }}">Logout</a></li>

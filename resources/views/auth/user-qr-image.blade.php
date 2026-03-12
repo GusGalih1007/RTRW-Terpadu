@@ -36,6 +36,13 @@
     <meta charset="utf-8">
     <title>QR Code {{ $user->username }}</title>
     <style>
+        html {
+            background-image: url('{{ asset('assets/images/auth/03.png') }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -45,11 +52,6 @@
             align-items: center;
             min-height: 100vh;
             background-color: #f5f5f5;
-            background-image: url('{{ asset('assets/images/auth/01.png') }}');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
         }
 
         .qr-card {
@@ -67,8 +69,8 @@
         }
 
         .qr-image {
-            width: 200px;
-            height: 200px;
+            width: 400px;
+            height: 400px;
             border: 2px solid #007bff;
             border-radius: 8px;
             margin: 0 auto;
@@ -124,22 +126,14 @@
 
         <div class="info-section">
             <div class="status-badge">
-                {{ $user->role->roleName === 'User' ? 'Warga: ' : 'Ketua RT/RW: ' . ($user->rtRwId ? $user->rtrw->rt . '/' . $user->rtrw->rw : '') }}
+                {{ $user->role->description . ': ' . $user->rtrw->rt . '/' . $user->rtrw->rw }}
             </div>
 
             <div class="user-name">{{ $user->username }}</div>
 
             <div class="user-address">
-                <div class="section-title">Alamat</div>
-                <div>{{ $user->alamatDetail }}</div><br>
-                <div class="section-title">Kelurahan</div>
-                <div>{{ $kelurahanName }}</div><br>
-                <div class="section-title">Kecamatan</div>
-                <div>{{ $kecamatanName }}</div><br>
-                <div class="section-title">Kabupaten</div>
-                <div>{{ $kabupatenName }}</div><br>
-                <div class="section-title">Provinsi</div>
-                <div>{{ $provinsiName }}</div><br>
+                <div class="section-title">Alamat tempat tinggal</div>
+                <div>{{ $fullAlamat }}</div>
             </div>
         </div>
     </div>

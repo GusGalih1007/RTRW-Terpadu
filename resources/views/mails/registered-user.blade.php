@@ -88,6 +88,13 @@
             border-left: 4px solid #007bff;
             margin: 20px 0;
         }
+
+        .highlight-orange {
+            background-color: #fdf5e3;
+            padding: 15px;
+            border-left: 4px solid #ff9d00;
+            margin: 20px 0;
+        }
     </style>
 </head>
 
@@ -101,6 +108,10 @@
         <div class="highlight">
             <p><strong>Terima kasih telah mendaftar!</strong> Data Anda telah berhasil disimpan dalam sistem RT/RW
                 Terpadu.</p>
+        </div>
+        <div class="highlight-orange">
+            <p><strong>Catatan penting!</strong> Sebelum anda dapat menggunakan aplikasi sebagai warga {{ $user->rtRwId ? $user->rtrw->rt . '/' . $user->rtrw->rw : '' }}, kami perlu
+                memverifikasi kedudukan anda sebagai warga untuk menghindari penyalahgunaan oleh pihak tidak bertanggung jawab</p>
         </div>
 
         <div class="user-info">
@@ -121,12 +132,12 @@
                 <span class="info-value">{{ Crypt::decrypt($user->password) }}</span>
             </div>
 
-            {{-- <div class="info-row">
-                <span class="info-label">NIK:</span>
-                <span class="info-value">{{ $user->nik ?? 'Belum diisi' }}</span>
+            <div>
+                <p class="info-label">Silahkan Login ke alamat situs berikut untuk menggunakan layanan kami</p>
+                <p class="info-value">{{ route('auth.login') }}</p>
             </div>
 
-            <div class="info-row">
+            {{-- <div class="info-row">
                 <span class="info-label">Nomor HP:</span>
                 <span class="info-value">{{ $user->phone ?? 'Belum diisi' }}</span>
             </div>

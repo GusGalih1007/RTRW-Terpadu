@@ -80,7 +80,7 @@ class AuthService
             Storage::disk('public')->makeDirectory($directory);
 
             QrCode::format('png')
-                ->size(300)
+                ->size(500)
                 ->margin(2)
                 ->generate(
                     $qrContent,

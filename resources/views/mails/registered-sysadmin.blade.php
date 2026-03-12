@@ -132,6 +132,11 @@
                 <span class="info-value">{{ Crypt::decrypt($user->password) }}</span>
             </div>
 
+            <div>
+                <p class="info-label">Silahkan Login ke alamat situs berikut untuk menggunakan layanan kami</p>
+                <p class="info-value">{{ route('auth.login') }}</p>
+            </div>
+
             {{-- <div class="info-row">
                 <span class="info-label">NIK:</span>
                 <span class="info-value">{{ $user->nik ?? 'Belum diisi' }}</span>

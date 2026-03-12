@@ -21,10 +21,12 @@
                                 <tr>
                                     <th>No.</th>
                                     <th>RT/RW</th>
-                                    <th>Provinsi</th>
-                                    <th>Kabupaten</th>
-                                    <th>Kecamatan</th>
-                                    <th>Kelurahan</th>
+                                    @if (Auth::user()->role->roleName === 'SYSAdmin')
+                                        <th>Provinsi</th>
+                                        <th>Kabupaten</th>
+                                        <th>Kecamatan</th>
+                                        <th>Kelurahan</th>
+                                    @endif
                                     <th>Alamat</th>
                                     <th>Action</th>
                                 </tr>
@@ -33,17 +35,20 @@
                                 @foreach ($data as $d)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $d->rt . '/' . $d->rw ?? '-' }}</td>
-                                        <td>{{ $d->province_name ?? '-' }}</td>
-                                        <td>{{ $d->regency_name ?? '-' }}</td>
-                                        <td>{{ $d->district_name ?? '-' }}</td>
-                                        <td>{{ $d->village_name ?? '-' }}</td>
-                                        <td>{{ $d->alamatDetail ?? '-' }}</td>
+                                        <td>{{ $d->rt . '/' . $d->rw ?? 'Tidak ada' }}</td>
+                                        @if (Auth::user()->role->roleName === 'SYSAdmin')
+                                            <td>{{ $d->province_name ?? 'Tidak ada' }}</td>
+                                            <td>{{ $d->regency_name ?? 'Tidak ada' }}</td>
+                                            <td>{{ $d->district_name ?? 'Tidak ada' }}</td>
+                                            <td>{{ $d->village_name ?? 'Tidak ada' }}</td>
+                                        @endif
+                                        <td>{{ $d->alamatDetail ?? 'Tidak ada' }}</td>
                                         <td>
                                             <form action="{{ route('admin.rt-rw.delete', $d->rtRwId) }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')
-                                                <a href="{{ route('admin.rt-rw.edit', $d->rtRwId) }}" class="btn btn-sm btn-warning">Edit</a>
+                                                <a href="{{ route('admin.rt-rw.edit', $d->rtRwId) }}"
+                                                    class="btn btn-sm btn-warning">Edit</a>
                                                 <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
                                             </form>
                                         </td>

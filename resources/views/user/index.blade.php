@@ -31,10 +31,10 @@
                             @foreach ($data as $d)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $d->nik }}</td>
-                                    <td>{{ $d->username }}</td>
-                                    <td>{{ $d->phone }}</td>
-                                    <td>{{ $d->email }}</td>
+                                    <td>{{ $d->nik ?? 'Tidak ada' }}</td>
+                                    <td>{{ $d->username ?? 'Tidak ada' }}</td>
+                                    <td>{{ $d->phone ?? 'Tidak ada' }}</td>
+                                    <td>{{ $d->email ?? 'Tidak ada' }}</td>
                                     <td>{{ $d->role->description }}</td>
                                     <td>
                                         <form method="POST" action="{{ route('user.delete', $d->userId) }}">

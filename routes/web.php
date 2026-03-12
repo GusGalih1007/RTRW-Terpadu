@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RtRwController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
@@ -60,7 +61,8 @@ Route::prefix('auth')->group(function () {
 Route::middleware('check-authentication')->group(function () {
 
     // sub-admin list route
-    Route::prefix('sub-admin')->name('sub-admin')->group(function () {
+    Route::prefix('subadmin')->name('subadmin')->group(function () {
+        Route::get('', [DashboardController::class, 'subadminDashboard'])->name('.index');
     
         // RT/RW
         Route::post('rt-rw', [RtRwController::class, 'store'])->name('.rt-rw.store');

@@ -491,7 +491,7 @@
                     </div>
                 </div>
 
-                <div class="form-row-3">
+                <div class="form-row">
                     <div class="form-group">
                         <label for="kodeKelurahan">Kelurahan/Desa <span class="required">*</span></label>
                         <select id="kodeKelurahan" name="kodeKelurahan" required disabled>
@@ -522,16 +522,8 @@
                         @error('rtRwId')
                         <div class="error-message" style="display: block;">{{ $message }}</div>
                         @enderror
-                    </div>
-                    
-                    <div class="form-group">
-                        {{-- <button type="button" class="btn-secondary" style="padding: 12px 16px; font-size: 14px; white-space: nowrap;" onclick="openRtRwModal()">
-                            + Tambah RT/RW
-                        </button> --}}
-                        <div>
-                            <small>RT/RW anda belum terdaftar? <a href="#"
-                                    onclick="openRtRwModal(); return false;">Daftarkan</a></small>
-                        </div>
+                        <small>RT/RW anda belum terdaftar? <a href="#"
+                                onclick="openRtRwModal(); return false;">Daftarkan</a></small>
                     </div>
                 </div>
 
@@ -547,10 +539,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="anggotaKeluarga">Jumlah Anggota Keluarga <span class="required">*</span></label>
+                        <label for="anggotaKeluarga">Jumlah Anggota dalam Kartu Keluarga <span class="required">*</span></label>
                         <input type="number" id="anggotaKeluarga" name="anggotaKeluarga"
                             value="{{ old('anggotaKeluarga') }}" placeholder="Jumlah anggota keluarga" required>
-                        <span class="text-muted">Termasuk Anda</span>
                         @error('anggotaKeluarga')
                             <div class="error-message" style="display: block;">{{ $message }}</div>
                         @enderror

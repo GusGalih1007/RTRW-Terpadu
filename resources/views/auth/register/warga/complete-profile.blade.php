@@ -327,7 +327,7 @@
                     </div>
                 </div>
 
-                <div class="form-row-3">
+                <div class="form-row">
                     <div class="form-group">
                         <label for="kodeKelurahan">Kelurahan/Desa <span class="required">*</span></label>
                         <select id="kodeKelurahan" name="kodeKelurahan" required disabled>
@@ -355,15 +355,10 @@
                                 @endif
                             </select>
                         </div>
+                        <small>RT/RW anda belum terdaftar? Hubungi petugas RT/RW setempat untuk mendaftarkan RT/RW kamu</small>
                         @error('rtRwId')
                         <div class="error-message" style="display: block;">{{ $message }}</div>
                         @enderror
-                    </div>
-                    
-                    <div class="form-group">
-                        <div>
-                            <small>RT/RW anda belum terdaftar? Hubungi petugas RT/RW setempat untuk mendaftarkan RT/RW kamu</small>
-                        </div>
                     </div>
                 </div>
 
@@ -382,7 +377,6 @@
                         <label for="anggotaKeluarga">Jumlah Anggota Keluarga <span class="required">*</span></label>
                         <input type="number" id="anggotaKeluarga" name="anggotaKeluarga"
                             value="{{ old('anggotaKeluarga') }}" placeholder="Jumlah anggota keluarga..." required>
-                        <span class="text-muted">Termasuk Anda</span>
                         @error('anggotaKeluarga')
                             <div class="error-message" style="display: block;">{{ $message }}</div>
                         @enderror

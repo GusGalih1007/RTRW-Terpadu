@@ -128,10 +128,10 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-md-3 col-sm-12">
-                                    <label for="role" class="form-label">Jenis Pengguna<span
+                                    <label for="role" class="form-label">Jabatan Pengguna<span
                                             class="text-danger">*</span></label>
                                     <select name="role" class="form-select" id="role">
-                                        <option value="" hidden selected>Pilih Role</option>
+                                        <option value="" hidden selected>Pilih Jabatan</option>
                                         <option value="warga"
                                             {{ $data ? ($data->role->roleName == 'User' ? 'selected' : '') : '' }}>Warga
                                         </option>
